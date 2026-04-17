@@ -37,7 +37,6 @@ export class AuthService {
                 username: dto.username,
                 email: dto.email,
                 password: hashed,
-                birthDate: new Date(dto.birthDate),
             },
         });
 
@@ -83,10 +82,7 @@ export class AuthService {
         id: string;
         username: string;
         email: string;
-        birthDate: Date;
         avatarUrl: string | null;
-        level: number;
-        xp: number;
     }) {
         const tokens = await this.issueTokens({
             sub: user.id,
@@ -102,10 +98,7 @@ export class AuthService {
             id: user.id,
             username: user.username,
             email: user.email,
-            birthDate: user.birthDate.toISOString(),
             avatarUrl: user.avatarUrl,
-            level: user.level,
-            xp: user.xp,
         };
     }
 

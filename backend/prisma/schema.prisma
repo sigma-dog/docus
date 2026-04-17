@@ -8,16 +8,84 @@ datasource db {
     provider = "postgresql"
 }
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+    ADMIN
+    EDITOR
+    VIEWER
+}
+
+// ─── User ────────────────────────────────────────────────────────────────────
+
 model User {
     id           String   @id @default(uuid())
     username     String
     email        String   @unique
     password     String
-    birthDate    DateTime
     avatarUrl    String?
-    level        Int      @default(1)
-    xp           Int      @default(0)
     refreshToken String?
+    role         Role     @default(VIEWER)
+
+    ownedSpaces  Space[]
+    memberships  SpaceMember[]
+    pages        Page[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+// ─── Space ───────────────────────────────────────────────────────────────────
+
+model Space {
+    id          String  @id @default(uuid())
+    name        String
+    key         String  @unique // короткий идентификатор: "PROJ", "TEAM"
+    description String?
+    avatarUrl   String?
+
+    ownerId String
+    owner   User   @relation(fields: [ownerId], references: [id])
+
+    members SpaceMember[]
+    pages   Page[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model SpaceMember {
+    id   String @id @default(uuid())
+    role Role   @default(VIEWER)
+
+    spaceId String
+    space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+
+    @@unique([spaceId, userId])
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
+model Page {
+    id       String  @id @default(uuid())
+    title    String
+    content  String? // JSON (например, TipTap/ProseMirror) или Markdown
+    position Int     @default(0) // порядок среди соседних страниц
+
+    spaceId String
+    space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+    parentId String?
+    parent   Page?   @relation("PageTree", fields: [parentId], references: [id])
+    children Page[]  @relation("PageTree")
+
+    authorId String
+    author   User   @relation(fields: [authorId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
