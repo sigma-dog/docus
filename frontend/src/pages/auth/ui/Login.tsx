@@ -5,6 +5,7 @@ import { Button, Field, Flex, Input } from '@chakra-ui/react';
 import { useLoginMutation } from 'shared/api/auth';
 import { setAccessToken, setRefreshToken } from 'shared/api/tokensUtils';
 import { setUserInfo } from 'shared/lib';
+import { toaster } from 'shared/ui/chakra/toaster';
 
 type LoginFormValues = {
     email: string;
@@ -34,6 +35,11 @@ export const Login = () => {
             navigate('/home');
         } catch (error) {
             console.error(error);
+            toaster.create({
+                type: 'error',
+                title: 'Ошибка входа',
+                description: 'Неверный email или пароль',
+            });
         }
     };
 

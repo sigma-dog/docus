@@ -1,6 +1,7 @@
 import {
     ConflictException,
     Injectable,
+    NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -47,10 +48,10 @@ export class AuthService {
         const user = await this.prisma.user.findUnique({
             where: { email: dto.email },
         });
-        if (!user) throw new UnauthorizedException('Invalid credentials');
+        if (!user) throw new NotFoundException('Invalid credentials');
 
         const valid = await bcrypt.compare(dto.password, user.password);
-        if (!valid) throw new UnauthorizedException('Invalid credentials');
+        if (!valid) throw new NotFoundException('Invalid credentials');
 
         return this.buildAuthResponse(user);
     }

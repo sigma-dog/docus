@@ -1,92 +1,72 @@
 generator client {
-    provider     = "prisma-client"
-    output       = "../generated/prisma"
-    moduleFormat = "cjs"
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
-    provider = "postgresql"
+  provider = "postgresql"
 }
-
-// ─── Enums ───────────────────────────────────────────────────────────────────
-
-enum Role {
-    ADMIN
-    EDITOR
-    VIEWER
-}
-
-// ─── User ────────────────────────────────────────────────────────────────────
 
 model User {
-    id           String   @id @default(uuid())
-    username     String
-    email        String   @unique
-    password     String
-    avatarUrl    String?
-    refreshToken String?
-    role         Role     @default(VIEWER)
-
-    ownedSpaces  Space[]
-    memberships  SpaceMember[]
-    pages        Page[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id           String        @id @default(uuid())
+  username     String
+  email        String        @unique
+  password     String
+  avatarUrl    String?
+  refreshToken String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  role         Role          @default(VIEWER)
+  pages        Page[]
+  ownedSpaces  Space[]
+  memberships  SpaceMember[]
 }
 
-// ─── Space ───────────────────────────────────────────────────────────────────
-
 model Space {
-    id          String  @id @default(uuid())
-    name        String
-    key         String  @unique // короткий идентификатор: "PROJ", "TEAM"
-    description String?
-    avatarUrl   String?
-
-    ownerId String
-    owner   User   @relation(fields: [ownerId], references: [id])
-
-    members SpaceMember[]
-    pages   Page[]
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id          String        @id @default(uuid())
+  name        String
+  key         String        @unique
+  description String?
+  avatarUrl   String?
+  ownerId     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  pages       Page[]
+  owner       User          @relation(fields: [ownerId], references: [id])
+  members     SpaceMember[]
 }
 
 model SpaceMember {
-    id   String @id @default(uuid())
-    role Role   @default(VIEWER)
+  id        String   @id @default(uuid())
+  role      Role     @default(VIEWER)
+  spaceId   String
+  userId    String
+  createdAt DateTime @default(now())
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    spaceId String
-    space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-
-    userId String
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    createdAt DateTime @default(now())
-
-    @@unique([spaceId, userId])
+  @@unique([spaceId, userId])
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
-
 model Page {
-    id       String  @id @default(uuid())
-    title    String
-    content  String? // JSON (например, TipTap/ProseMirror) или Markdown
-    position Int     @default(0) // порядок среди соседних страниц
+  id        String   @id @default(uuid())
+  title     String
+  content   String?
+  position  Int      @default(0)
+  spaceId   String
+  parentId  String?
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id])
+  parent    Page?    @relation("PageTree", fields: [parentId], references: [id])
+  children  Page[]   @relation("PageTree")
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+}
 
-    spaceId String
-    space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-
-    parentId String?
-    parent   Page?   @relation("PageTree", fields: [parentId], references: [id])
-    children Page[]  @relation("PageTree")
-
-    authorId String
-    author   User   @relation(fields: [authorId], references: [id])
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
 }

@@ -25,7 +25,6 @@ const Auth = () => {
                 gap={10}
                 borderRadius="lg"
             >
-                {/* <Heading size="4xl">GeoSpotter</Heading> */}
                 <Image src={logo} h="10" />
                 {mode === 'login' ? <Login /> : <Register />}
                 <Flex gap={1} w="full" justifyContent="space-between">

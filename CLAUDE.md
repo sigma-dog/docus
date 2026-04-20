@@ -98,12 +98,13 @@ src/
 
 Роли работают на двух уровнях:
 
-| Уровень | Поле | Значения |
-|---------|------|----------|
-| Глобальный | `User.role` | `ADMIN \| EDITOR \| VIEWER` |
+| Уровень      | Поле               | Значения                    |
+| ------------ | ------------------ | --------------------------- |
+| Глобальный   | `User.role`        | `ADMIN \| EDITOR \| VIEWER` |
 | Пространство | `SpaceMember.role` | `ADMIN \| EDITOR \| VIEWER` |
 
 Логика проверки доступа — в сервисах через private-хелперы:
+
 - `assertMember` — проверяет, что пользователь участник пространства
 - `assertAdminOrOwner` — owner пространства или участник с ролью ADMIN
 - `assertEditor` — owner или участник с ролью EDITOR/ADMIN (не VIEWER)
@@ -111,11 +112,13 @@ src/
 ### API endpoints
 
 **Auth** (`/auth`)
+
 - `POST /auth/register` — регистрация
 - `POST /auth/login` — вход
 - `POST /auth/refresh` — обновление токенов
 
 **Spaces** (`/spaces`) — все защищены JwtAuthGuard
+
 - `POST /spaces` — создать пространство (автор становится owner + ADMIN-участником)
 - `GET /spaces` — мои пространства (owner или участник)
 - `GET /spaces/:key` — детали пространства (участник)
@@ -125,6 +128,7 @@ src/
 - `DELETE /spaces/:key/members/:userId` — удалить участника (owner/ADMIN)
 
 **Pages** (`/spaces/:key/pages`) — все защищены JwtAuthGuard
+
 - `POST /spaces/:key/pages` — создать страницу (EDITOR+)
 - `GET /spaces/:key/pages` — дерево страниц (VIEWER+)
 - `GET /spaces/:key/pages/:pageId` — одна страница с прямыми дочерними (VIEWER+)
@@ -160,6 +164,10 @@ Uses **Feature-Sliced Design (FSD)**:
 - `features/`, `widgets/`, `entities/` — FSD layers (currently empty, populate as needed)
 
 New code should follow FSD layering: `shared` → `entities` → `features` → `widgets` → `pages` → `app`. Lower layers must not import from higher layers.
+
+Use Chakra UI if possible
+Don't use inline styles with no cause
+Don't use enums, use "as const" instead
 
 ## Code Style
 
