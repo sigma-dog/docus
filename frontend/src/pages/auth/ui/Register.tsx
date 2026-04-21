@@ -38,7 +38,7 @@ export const Register = () => {
             setAccessToken(userData.access);
             setRefreshToken(userData.refresh);
 
-            navigate('/home');
+            navigate('/');
         } catch (err) {
             console.error(err);
         }

@@ -8,6 +8,7 @@ import {
     Param,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 
@@ -30,8 +31,11 @@ export class SpacesController {
     }
 
     @Get()
-    findMine(@CurrentUser() user: AuthUser) {
-        return this.spacesService.findMine(user.id);
+    findMine(
+        @CurrentUser() user: AuthUser,
+        @Query('organizationSlug') organizationSlug?: string
+    ) {
+        return this.spacesService.findMine(user.id, organizationSlug);
     }
 
     @Get(':key')

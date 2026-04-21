@@ -32,7 +32,7 @@ export const Login = () => {
             setAccessToken(userData.access);
             setRefreshToken(userData.refresh);
 
-            navigate('/home');
+            navigate('/');
         } catch (error) {
             console.error(error);
             toaster.create({

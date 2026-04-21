@@ -7,6 +7,7 @@ export const apiMethods = {
 } as const;
 
 export const tagTypes = {
-    // Текущий пользователь
     CurrentUser: 'CurrentUser',
+    Spaces: 'Spaces',
+    Organizations: 'Organizations',
 } as const;

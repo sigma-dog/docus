@@ -5,6 +5,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 
+import { OrganizationsService } from '../organizations/organizations.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddMemberDto } from './dto/add-member.dto';
 import { CreateSpaceDto } from './dto/create-space.dto';
@@ -12,15 +13,30 @@ import { UpdateSpaceDto } from './dto/update-space.dto';
 
 @Injectable()
 export class SpacesService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private organizationsService: OrganizationsService
+    ) {}
 
     async create(userId: string, dto: CreateSpaceDto) {
-        const exists = await this.prisma.space.findUnique({
-            where: { key: dto.key },
+        const org: Awaited<
+            ReturnType<typeof this.organizationsService.getOrgOrThrow>
+        > = await this.organizationsService.getOrgOrThrow(dto.organizationSlug);
+
+        const isMember =
+            org.ownerId === userId ||
+            org.members.some((m) => m.userId === userId);
+        if (!isMember)
+            throw new ForbiddenException(
+                'You are not a member of this organization'
+            );
+
+        const exists = await this.prisma.space.findFirst({
+            where: { key: dto.key, organizationId: org.id },
         });
         if (exists)
             throw new ConflictException(
-                `Space with key "${dto.key}" already exists`
+                `Space with key "${dto.key}" already exists in this organization`
             );
 
         return this.prisma.space.create({
@@ -29,6 +45,7 @@ export class SpacesService {
                 key: dto.key,
                 description: dto.description,
                 ownerId: userId,
+                organizationId: org.id,
                 members: {
                     create: { userId, role: 'ADMIN' },
                 },
@@ -37,9 +54,14 @@ export class SpacesService {
         });
     }
 
-    async findMine(userId: string) {
+    async findMine(userId: string, organizationSlug?: string) {
+        const orgFilter = organizationSlug
+            ? { organization: { slug: organizationSlug } }
+            : {};
+
         return this.prisma.space.findMany({
             where: {
+                ...orgFilter,
                 OR: [{ ownerId: userId }, { members: { some: { userId } } }],
             },
             include: {

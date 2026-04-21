@@ -9,12 +9,12 @@ import { Mutex } from 'async-mutex';
 import {
     getAccessToken,
     getRefreshToken,
-    removeAccessToken,
-    removeRefreshToken,
+    // removeAccessToken,
+    // removeRefreshToken,
     setAccessToken,
     setRefreshToken,
 } from './tokensUtils';
-import { removeUserInfo } from '../lib/userUtils';
+// import { removeUserInfo } from '../lib/userUtils';
 
 type Tokens = {
     access: string;
@@ -71,12 +71,12 @@ export const baseQueryWithReauth: BaseQueryFn<
                 } else {
                     console.error('Unable to refresh token');
 
-                    removeAccessToken();
-                    removeRefreshToken();
+                    // removeAccessToken();
+                    // removeRefreshToken();
 
-                    removeUserInfo();
+                    // removeUserInfo();
 
-                    window.location.href = '/auth';
+                    // window.location.href = '/auth';
                 }
             } finally {
                 release();

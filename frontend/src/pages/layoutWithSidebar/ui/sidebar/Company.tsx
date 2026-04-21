@@ -1,29 +1,26 @@
 import type { FC } from 'react';
 import { Avatar, HStack, Stack, Text } from '@chakra-ui/react';
 
+import type { Organization } from 'shared/types';
+
 type CompanyProps = {
-    workspaceName: string;
-    workspaceDescription: string;
+    organization: Organization | undefined;
     isExpanded: boolean;
 };
 
-export const Company: FC<CompanyProps> = ({
-    workspaceName,
-    workspaceDescription,
-    isExpanded,
-}) => {
+export const Company: FC<CompanyProps> = ({ organization, isExpanded }) => {
     return (
         <HStack gap={2}>
             <Avatar.Root size="lg" shape="rounded">
-                <Avatar.Fallback name={workspaceName} />
+                <Avatar.Fallback name={organization?.name ?? ''} />
             </Avatar.Root>
             {isExpanded && (
                 <Stack gap={0}>
                     <Text fontWeight="medium" fontSize="lg" lineHeight="28px">
-                        {workspaceName}
+                        {organization?.name ?? ''}
                     </Text>
                     <Text color="fg.muted" fontSize="md">
-                        {workspaceDescription}
+                        {organization?.description ?? ''}
                     </Text>
                 </Stack>
             )}

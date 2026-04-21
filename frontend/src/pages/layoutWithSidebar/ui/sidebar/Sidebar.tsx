@@ -1,30 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Flex, Stack } from '@chakra-ui/react';
 
+import { useGetOrganizationsQuery } from 'shared/api';
+import { saveLastVisited } from 'shared/lib';
+
+import { SpaceSelect } from './spaceSelect/SpaceSelect';
 import { AddButton } from './AddButton';
 import { Company } from './Company';
 import { Navigation } from './Navigation';
 import { SidebarFooter } from './SidebarFooter';
 import { SidebarHeader } from './SidebarHeader';
-import { SpaceSelect } from './SpaceSelect';
-
-type SidebarProps = {
-    workspaceName: string;
-    workspaceDescription: string;
-    spaceName: string;
-    spaceKey: string;
-};
 
 const EXPANDED_WIDTH = 375;
 const COLLAPSED_WIDTH = 90;
 
-export const Sidebar = ({
-    workspaceName,
-    workspaceDescription,
-    spaceName,
-    spaceKey,
-}: SidebarProps) => {
+export const Sidebar = () => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const { data: organizations = [] } = useGetOrganizationsQuery();
+    const { orgSlug, spaceKey } = useParams<{
+        orgSlug: string;
+        spaceKey?: string;
+    }>();
+    const navigate = useNavigate();
+
+    const selectedOrg =
+        organizations.find((o) => o.slug === orgSlug) ?? organizations[0];
+
+    useEffect(() => {
+        if (orgSlug && spaceKey) {
+            saveLastVisited(orgSlug, spaceKey);
+        }
+    }, [orgSlug, spaceKey]);
+
+    const handleSelectSpace = (key: string) => {
+        if (!selectedOrg) {
+            return;
+        }
+        saveLastVisited(selectedOrg.slug, key);
+        navigate(`/${selectedOrg.slug}/${key}`);
+    };
 
     const toggleExpanded = () => {
         setIsExpanded((prev) => !prev);
@@ -55,15 +70,15 @@ export const Sidebar = ({
             >
                 <Stack gap={5} alignItems={isExpanded ? 'stretch' : 'center'}>
                     <Company
-                        workspaceName={workspaceName}
-                        workspaceDescription={workspaceDescription}
+                        organization={selectedOrg}
                         isExpanded={isExpanded}
                     />
 
-                    {isExpanded && (
+                    {isExpanded && selectedOrg && (
                         <SpaceSelect
-                            spaceName={spaceName}
-                            spaceKey={spaceKey}
+                            selectedKey={spaceKey ?? ''}
+                            onSelect={handleSelectSpace}
+                            organizationSlug={selectedOrg.slug}
                         />
                     )}
 

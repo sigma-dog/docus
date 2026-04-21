@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { AuthModule } from './auth/auth.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 import { PagesModule } from './pages/pages.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SpacesModule } from './spaces/spaces.module';
@@ -13,6 +14,7 @@ import { SpacesModule } from './spaces/spaces.module';
         AuthModule,
         SpacesModule,
         PagesModule,
+        OrganizationsModule,
     ],
 })
 export class AppModule {}

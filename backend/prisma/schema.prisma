@@ -9,32 +9,74 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  username     String
-  email        String        @unique
-  password     String
-  avatarUrl    String?
-  refreshToken String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  role         Role          @default(VIEWER)
-  pages        Page[]
-  ownedSpaces  Space[]
-  memberships  SpaceMember[]
+  id              String            @id @default(uuid())
+  username        String
+  email           String            @unique
+  password        String
+  avatarUrl       String?
+  refreshToken    String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  role            Role              @default(VIEWER)
+  pages           Page[]
+  ownedSpaces     Space[]
+  memberships     SpaceMember[]
+  ownedOrgs       Organization[]
+  orgMemberships  OrgMember[]
 }
 
-model Space {
-  id          String        @id @default(uuid())
+model Organization {
+  id          String              @id @default(uuid())
   name        String
-  key         String        @unique
+  slug        String              @unique
   description String?
   avatarUrl   String?
   ownerId     String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  pages       Page[]
-  owner       User          @relation(fields: [ownerId], references: [id])
-  members     SpaceMember[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  owner       User                @relation(fields: [ownerId], references: [id])
+  members     OrgMember[]
+  spaces      Space[]
+  invites     OrganizationInvite[]
+}
+
+model OrganizationInvite {
+  id             String      @id @default(uuid())
+  code           String      @unique @default(cuid())
+  organizationId String
+  role           OrgRole     @default(MEMBER)
+  expiresAt      DateTime?
+  usedAt         DateTime?
+  createdAt      DateTime    @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model OrgMember {
+  id             String      @id @default(uuid())
+  role           OrgRole     @default(MEMBER)
+  organizationId String
+  userId         String
+  createdAt      DateTime    @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+}
+
+model Space {
+  id             String        @id @default(uuid())
+  name           String
+  key            String        @unique
+  description    String?
+  avatarUrl      String?
+  ownerId        String
+  organizationId String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  pages          Page[]
+  owner          User          @relation(fields: [ownerId], references: [id])
+  members        SpaceMember[]
+  organization   Organization  @relation(fields: [organizationId], references: [id])
 }
 
 model SpaceMember {
@@ -69,4 +111,10 @@ enum Role {
   ADMIN
   EDITOR
   VIEWER
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
 }
