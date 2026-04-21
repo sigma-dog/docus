@@ -4,7 +4,7 @@ import { Button, Field, Flex, Input } from '@chakra-ui/react';
 
 import { useRegisterMutation } from 'shared/api/auth';
 import { setAccessToken, setRefreshToken } from 'shared/api/tokensUtils';
-import { setUserInfo } from 'shared/lib';
+import { removeLastVisited, setUserInfo } from 'shared/lib';
 
 type RegisterFormValues = {
     username: string;
@@ -34,6 +34,7 @@ export const Register = () => {
                 birthDate: formattedBirthdate,
             }).unwrap();
 
+            removeLastVisited();
             setUserInfo(userData);
             setAccessToken(userData.access);
             setRefreshToken(userData.refresh);

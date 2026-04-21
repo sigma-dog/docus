@@ -4,7 +4,7 @@ import { Button, Field, Flex, Input } from '@chakra-ui/react';
 
 import { useLoginMutation } from 'shared/api/auth';
 import { setAccessToken, setRefreshToken } from 'shared/api/tokensUtils';
-import { setUserInfo } from 'shared/lib';
+import { removeLastVisited, setUserInfo } from 'shared/lib';
 import { toaster } from 'shared/ui/chakra/toaster';
 
 type LoginFormValues = {
@@ -28,6 +28,7 @@ export const Login = () => {
         try {
             const userData = await loginUser(data).unwrap();
 
+            removeLastVisited();
             setUserInfo(userData);
             setAccessToken(userData.access);
             setRefreshToken(userData.refresh);

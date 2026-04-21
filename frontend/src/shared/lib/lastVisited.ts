@@ -10,3 +10,8 @@ export const saveLastVisited = (orgSlug: string, spaceKey: string) => {
     localStorage.setItem(ORG_KEY, orgSlug);
     localStorage.setItem(SPACE_KEY, spaceKey);
 };
+
+export const removeLastVisited = () => {
+    localStorage.removeItem(ORG_KEY);
+    localStorage.removeItem(SPACE_KEY);
+};

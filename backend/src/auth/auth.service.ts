@@ -76,7 +76,15 @@ export class AuthService {
             throw new UnauthorizedException('Invalid refresh token');
         }
 
-        return this.issueTokens({ sub: user.id, email: user.email });
+        const tokens = await this.issueTokens({
+            sub: user.id,
+            email: user.email,
+        });
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { refreshToken: tokens.refresh },
+        });
+        return tokens;
     }
 
     private async buildAuthResponse(user: {
