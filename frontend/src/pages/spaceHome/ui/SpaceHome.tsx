@@ -34,9 +34,10 @@ export const SpaceHome = () => {
     const { data: org, isLoading: orgLoading } = useGetOrganizationQuery(
         orgSlug!
     );
-    const { data: space, isLoading: spaceLoading } = useGetSpaceQuery(
-        spaceKey!
-    );
+    const { data: space, isLoading: spaceLoading } = useGetSpaceQuery({
+        key: spaceKey!,
+        organizationSlug: orgSlug!,
+    });
 
     if (orgLoading || spaceLoading) {
         return (

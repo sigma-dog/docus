@@ -39,8 +39,12 @@ export class SpacesController {
     }
 
     @Get(':key')
-    findOne(@Param('key') key: string, @CurrentUser() user: AuthUser) {
-        return this.spacesService.findOne(key, user.id);
+    findOne(
+        @Param('key') key: string,
+        @CurrentUser() user: AuthUser,
+        @Query('organizationSlug') organizationSlug: string
+    ) {
+        return this.spacesService.findOne(key, user.id, organizationSlug);
     }
 
     @Patch(':key')

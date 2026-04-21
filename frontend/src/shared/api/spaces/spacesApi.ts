@@ -27,12 +27,15 @@ export const spacesApi = api.injectEndpoints({
             providesTags: [tagTypes.Spaces],
         }),
 
-        getSpace: build.query<Space, string>({
-            query: (key) => `${getUrl()}/${key}`,
-            providesTags: (_result, _error, key) => [
-                { type: tagTypes.Spaces, id: key },
-            ],
-        }),
+        getSpace: build.query<Space, { key: string; organizationSlug: string }>(
+            {
+                query: ({ key, organizationSlug }) =>
+                    `${getUrl()}/${key}?organizationSlug=${organizationSlug}`,
+                providesTags: (_result, _error, { key }) => [
+                    { type: tagTypes.Spaces, id: key },
+                ],
+            }
+        ),
 
         createSpace: build.mutation<Space, CreateSpaceBody>({
             query: (body) => ({

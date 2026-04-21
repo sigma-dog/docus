@@ -1,12 +1,49 @@
 import { useState } from 'react';
-import { Center, Flex, Image, Separator, Tabs, Text } from '@chakra-ui/react';
+import { Navigate } from 'react-router-dom';
+import {
+    Center,
+    Flex,
+    Image,
+    Separator,
+    Spinner,
+    Tabs,
+    Text,
+} from '@chakra-ui/react';
 import logo from 'assets/Logo.svg';
+
+import { useGetOrganizationsQuery } from 'shared/api';
+import { getAccessToken } from 'shared/api/tokensUtils';
+import { getLastOrgSlug, getLastSpaceKey } from 'shared/lib';
 
 import { CreateOrgForm } from './CreateOrgForm';
 import { JoinOrgForm } from './JoinOrgForm';
 
 const Onboarding = () => {
     const [tab, setTab] = useState<'create' | 'join'>('create');
+    const token = getAccessToken();
+
+    const { data: orgs, isLoading } = useGetOrganizationsQuery(undefined, {
+        skip: !token,
+    });
+
+    if (isLoading) {
+        return (
+            <Center w="100vw" h="100vh">
+                <Spinner size="lg" />
+            </Center>
+        );
+    }
+
+    if (orgs?.length) {
+        const lastOrg = getLastOrgSlug();
+        const lastSpace = getLastSpaceKey();
+        const targetOrg = orgs.find((o) => o.slug === lastOrg) ?? orgs[0];
+
+        if (lastSpace) {
+            return <Navigate to={`/${targetOrg.slug}/${lastSpace}`} replace />;
+        }
+        return <Navigate to={`/${targetOrg.slug}`} replace />;
+    }
 
     return (
         <Center w="full" h="full">

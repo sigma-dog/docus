@@ -26,18 +26,20 @@ export class SpacesService {
         const isMember =
             org.ownerId === userId ||
             org.members.some((m) => m.userId === userId);
-        if (!isMember)
+        if (!isMember) {
             throw new ForbiddenException(
                 'You are not a member of this organization'
             );
+        }
 
         const exists = await this.prisma.space.findFirst({
             where: { key: dto.key, organizationId: org.id },
         });
-        if (exists)
+        if (exists) {
             throw new ConflictException(
                 `Space with key "${dto.key}" already exists in this organization`
             );
+        }
 
         return this.prisma.space.create({
             data: {
@@ -71,9 +73,13 @@ export class SpacesService {
         });
     }
 
-    async findOne(key: string, userId: string) {
-        const space = await this.prisma.space.findUnique({
-            where: { key },
+    async findOne(key: string, userId: string, organizationSlug: string) {
+        const space = await this.prisma.space.findFirst({
+            where: {
+                key,
+                organization: { slug: organizationSlug },
+                OR: [{ ownerId: userId }, { members: { some: { userId } } }],
+            },
             include: {
                 members: {
                     include: {
@@ -90,7 +96,6 @@ export class SpacesService {
             },
         });
         if (!space) throw new NotFoundException(`Space "${key}" not found`);
-        this.assertMember(space, userId);
         return space;
     }
 
@@ -99,19 +104,20 @@ export class SpacesService {
         this.assertAdminOrOwner(space, userId);
 
         return this.prisma.space.update({
-            where: { key },
+            where: { id: space.id },
             data: dto,
         });
     }
 
     async remove(key: string, userId: string) {
         const space = await this.getSpaceOrThrow(key);
-        if (space.ownerId !== userId)
+        if (space.ownerId !== userId) {
             throw new ForbiddenException(
                 'Only the owner can delete this space'
             );
+        }
 
-        await this.prisma.space.delete({ where: { key } });
+        await this.prisma.space.delete({ where: { id: space.id } });
     }
 
     async addMember(key: string, requesterId: string, dto: AddMemberDto) {
@@ -123,8 +129,9 @@ export class SpacesService {
                 spaceId_userId: { spaceId: space.id, userId: dto.userId },
             },
         });
-        if (alreadyMember)
+        if (alreadyMember) {
             throw new ConflictException('User is already a member');
+        }
 
         return this.prisma.spaceMember.create({
             data: { spaceId: space.id, userId: dto.userId, role: dto.role },
@@ -155,22 +162,12 @@ export class SpacesService {
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     async getSpaceOrThrow(key: string) {
-        const space = await this.prisma.space.findUnique({
+        const space = await this.prisma.space.findFirst({
             where: { key },
             include: { members: true },
         });
         if (!space) throw new NotFoundException(`Space "${key}" not found`);
         return space;
-    }
-
-    private assertMember(
-        space: { ownerId: string; members: { userId: string }[] },
-        userId: string
-    ) {
-        const isMember =
-            space.ownerId === userId ||
-            space.members.some((m) => m.userId === userId);
-        if (!isMember) throw new ForbiddenException('Access denied');
     }
 
     private assertAdminOrOwner(
@@ -179,7 +176,8 @@ export class SpacesService {
     ) {
         if (space.ownerId === userId) return;
         const member = space.members.find((m) => m.userId === userId);
-        if (!member || member.role !== 'ADMIN')
+        if (!member || member.role !== 'ADMIN') {
             throw new ForbiddenException('Insufficient permissions');
+        }
     }
 }
