@@ -97,6 +97,7 @@ model Page {
   id        String   @id @default(uuid())
   title     String
   content   String?
+  isFolder  Boolean  @default(false)
   position  Int      @default(0)
   spaceId   String
   parentId  String?
@@ -104,7 +105,7 @@ model Page {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   author    User     @relation(fields: [authorId], references: [id])
-  parent    Page?    @relation("PageTree", fields: [parentId], references: [id])
+  parent    Page?    @relation("PageTree", fields: [parentId], references: [id], onDelete: Cascade)
   children  Page[]   @relation("PageTree")
   space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 }

@@ -4,25 +4,36 @@ import { Flex, Stack } from '@chakra-ui/react';
 
 import { useGetOrganizationsQuery } from 'shared/api';
 import { saveLastVisited } from 'shared/lib';
+import { CreatePageOrFolderDialog } from 'widgets/createPageOrFolderDialog';
 
+import { Navigation } from './navigation/Navigation';
 import { SpaceSelect } from './spaceSelect/SpaceSelect';
 import { AddButton } from './AddButton';
 import { Company } from './Company';
-import { Navigation } from './Navigation';
 import { SidebarFooter } from './SidebarFooter';
 import { SidebarHeader } from './SidebarHeader';
 
 const EXPANDED_WIDTH = 375;
 const COLLAPSED_WIDTH = 90;
 
+type CreateIntent = {
+    isFolder: boolean;
+    parentId?: string;
+};
+
 export const Sidebar = () => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const [createIntent, setCreateIntent] = useState<CreateIntent | null>(null);
     const { data: organizations = [] } = useGetOrganizationsQuery();
     const { orgSlug, spaceKey } = useParams<{
         orgSlug: string;
         spaceKey?: string;
     }>();
     const navigate = useNavigate();
+
+    const openCreate = (isFolder: boolean, parentId?: string) => {
+        setCreateIntent({ isFolder, parentId });
+    };
 
     const selectedOrg =
         organizations.find((o) => o.slug === orgSlug) ?? organizations[0];
@@ -83,13 +94,36 @@ export const Sidebar = () => {
                     )}
 
                     <Stack gap={4}>
-                        <AddButton isExpanded={isExpanded} />
-                        {isExpanded && <Navigation />}
+                        <AddButton
+                            isExpanded={isExpanded}
+                            onCreatePage={() => openCreate(false)}
+                            onCreateFolder={() => openCreate(true)}
+                        />
+                        {isExpanded && (
+                            <Navigation
+                                onCreatePage={(parentId) =>
+                                    openCreate(false, parentId)
+                                }
+                                onCreateFolder={(parentId) =>
+                                    openCreate(true, parentId)
+                                }
+                            />
+                        )}
                     </Stack>
                 </Stack>
 
                 <SidebarFooter isExpanded={isExpanded} />
             </Flex>
+
+            {spaceKey && createIntent && (
+                <CreatePageOrFolderDialog
+                    isOpen
+                    onClose={() => setCreateIntent(null)}
+                    spaceKey={spaceKey}
+                    parentId={createIntent.parentId}
+                    isFolder={createIntent.isFolder}
+                />
+            )}
         </Flex>
     );
 };

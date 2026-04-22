@@ -1,4 +1,11 @@
-import { IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import {
+    IsBoolean,
+    IsInt,
+    IsOptional,
+    IsString,
+    Min,
+    MinLength,
+} from 'class-validator';
 
 export class UpdatePageDto {
     @IsOptional()
@@ -9,6 +16,10 @@ export class UpdatePageDto {
     @IsOptional()
     @IsString()
     content?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isFolder?: boolean;
 
     @IsOptional()
     @IsInt()

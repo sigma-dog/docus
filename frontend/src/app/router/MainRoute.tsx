@@ -5,8 +5,8 @@ import {
     Route,
 } from 'react-router-dom';
 
-import { OrgRoute } from 'pages/layoutWithSidebar/ui/OrgRoute';
-import { ProtectedRoute } from 'pages/layoutWithSidebar/ui/ProtectedRoute';
+import { OrgRoute } from 'pages/orgRoute';
+import { ProtectedRoute } from 'pages/protectedRoute';
 
 const Index = lazy(() => import('pages/index'));
 const Auth = lazy(() => import('pages/auth'));

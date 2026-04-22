@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
     LuChevronRight,
     LuEllipsis,
@@ -23,13 +24,20 @@ import {
     Text,
 } from '@chakra-ui/react';
 
-import { useGetOrganizationQuery, useGetSpaceQuery } from 'shared/api';
+import {
+    useGetOrganizationQuery,
+    useGetPagesQuery,
+    useGetSpaceQuery,
+} from 'shared/api';
+import { CreatePageOrFolderDialog } from 'widgets/createPageOrFolderDialog';
 
 export const SpaceHome = () => {
     const { orgSlug, spaceKey } = useParams<{
         orgSlug: string;
         spaceKey: string;
     }>();
+
+    const [isCreatePageOpen, setIsCreatePageOpen] = useState(false);
 
     const { data: org, isLoading: orgLoading } = useGetOrganizationQuery(
         orgSlug!
@@ -38,6 +46,12 @@ export const SpaceHome = () => {
         key: spaceKey!,
         organizationSlug: orgSlug!,
     });
+    const { data: pages = [], isLoading: pagesLoading } = useGetPagesQuery(
+        spaceKey!,
+        {
+            skip: !spaceKey,
+        }
+    );
 
     if (orgLoading || spaceLoading) {
         return (
@@ -46,6 +60,8 @@ export const SpaceHome = () => {
             </Center>
         );
     }
+
+    const rootPages = pages.filter((p) => !p.parentId);
 
     return (
         <Box flex="1" overflowY="auto" bg="bg.subtle" p={8}>
@@ -71,7 +87,12 @@ export const SpaceHome = () => {
                     </Breadcrumb.Root>
 
                     <HStack gap={4}>
-                        <Button variant="subtle" colorPalette="blue" size="sm">
+                        <Button
+                            variant="subtle"
+                            colorPalette="blue"
+                            size="sm"
+                            onClick={() => setIsCreatePageOpen(true)}
+                        >
                             <LuPlus />
                             Создать
                         </Button>
@@ -104,35 +125,66 @@ export const SpaceHome = () => {
                     )}
                 </Box>
 
-                {/* Placeholder — страницы будут здесь */}
-                <Grid templateColumns="repeat(4, 250px)" gap={2}>
-                    {[
-                        { id: '1', label: 'Документация', isFolder: true },
-                        { id: '2', label: 'API Reference', isFolder: false },
-                        { id: '3', label: 'Changelog', isFolder: false },
-                    ].map((page) => (
-                        <HStack
-                            key={page.id}
-                            bg="white"
-                            rounded="lg"
-                            p={4}
-                            justify="space-between"
-                            cursor="pointer"
-                            _hover={{ shadow: 'sm' }}
-                        >
-                            <HStack gap={2}>
-                                <Icon boxSize={4} color="fg.muted">
-                                    {page.isFolder ? <LuFolder /> : <LuFile />}
-                                </Icon>
-                                <Text fontSize="xs">{page.label}</Text>
-                            </HStack>
-                            <Icon boxSize={4} color="fg.muted">
-                                <LuEllipsis />
-                            </Icon>
-                        </HStack>
-                    ))}
-                </Grid>
+                {/* Pages grid */}
+                {pagesLoading ? (
+                    <Center py={8}>
+                        <Spinner size="md" />
+                    </Center>
+                ) : rootPages.length === 0 ? (
+                    <Center py={16}>
+                        <Stack align="center" gap={3}>
+                            <Text color="fg.muted">Страниц пока нет</Text>
+                            <Button
+                                size="sm"
+                                colorPalette="blue"
+                                onClick={() => setIsCreatePageOpen(true)}
+                            >
+                                <LuPlus />
+                                Создать первую страницу
+                            </Button>
+                        </Stack>
+                    </Center>
+                ) : (
+                    <Grid templateColumns="repeat(4, 250px)" gap={2}>
+                        {rootPages.map((page) => {
+                            const isFolder = page.children.length > 0;
+                            return (
+                                <HStack
+                                    key={page.id}
+                                    bg="white"
+                                    rounded="lg"
+                                    p={4}
+                                    justify="space-between"
+                                    cursor="pointer"
+                                    _hover={{ shadow: 'sm' }}
+                                >
+                                    <HStack gap={2}>
+                                        <Icon boxSize={4} color="fg.muted">
+                                            {isFolder ? (
+                                                <LuFolder />
+                                            ) : (
+                                                <LuFile />
+                                            )}
+                                        </Icon>
+                                        <Text fontSize="xs">{page.title}</Text>
+                                    </HStack>
+                                    <Icon boxSize={4} color="fg.muted">
+                                        <LuEllipsis />
+                                    </Icon>
+                                </HStack>
+                            );
+                        })}
+                    </Grid>
+                )}
             </Stack>
+
+            {spaceKey && (
+                <CreatePageOrFolderDialog
+                    isOpen={isCreatePageOpen}
+                    onClose={() => setIsCreatePageOpen(false)}
+                    spaceKey={spaceKey}
+                />
+            )}
         </Box>
     );
 };

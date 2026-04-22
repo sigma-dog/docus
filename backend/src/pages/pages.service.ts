@@ -29,6 +29,7 @@ export class PagesService {
             data: {
                 title: dto.title,
                 content: dto.content,
+                isFolder: dto.isFolder ?? false,
                 position: dto.position ?? 0,
                 spaceId: space.id,
                 parentId: dto.parentId ?? null,
@@ -54,7 +55,7 @@ export class PagesService {
                     select: { id: true, username: true, avatarUrl: true },
                 },
             },
-            orderBy: [{ parentId: 'asc' }, { position: 'asc' }],
+            orderBy: [{ parentId: 'asc' }, { isFolder: 'desc' }, { position: 'asc' }, { createdAt: 'asc' }],
         });
 
         return buildTree(pages);
