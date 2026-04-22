@@ -14,6 +14,7 @@ const Onboarding = lazy(() => import('pages/onboarding'));
 const LayoutWithSidebar = lazy(() => import('pages/layoutWithSidebar'));
 const LayoutWithMainHeader = lazy(() => import('pages/layoutWithMainHeader'));
 const SpaceHome = lazy(() => import('pages/spaceHome'));
+const PageView = lazy(() => import('pages/pageView'));
 
 export const mainRouter = createBrowserRouter(
     createRoutesFromElements(
@@ -27,6 +28,10 @@ export const mainRouter = createBrowserRouter(
                     <Route path=":orgSlug" element={<OrgRoute />}>
                         <Route element={<LayoutWithMainHeader />}>
                             <Route path=":spaceKey" element={<SpaceHome />} />
+                            <Route
+                                path=":spaceKey/pages/:pageId"
+                                element={<PageView />}
+                            />
                         </Route>
                     </Route>
                 </Route>

@@ -50,6 +50,7 @@ export class PagesService {
 
         const pages = await this.prisma.page.findMany({
             where: { spaceId: space.id },
+            omit: { content: true },
             include: {
                 author: {
                     select: { id: true, username: true, avatarUrl: true },

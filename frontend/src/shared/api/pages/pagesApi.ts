@@ -1,4 +1,4 @@
-import type { Page } from '../../types';
+import type { Page, PageSummary } from '../../types';
 import { api } from '../api';
 import { apiMethods, tagTypes } from '../constants';
 
@@ -25,7 +25,7 @@ const getUrl = (spaceKey: string) => `spaces/${spaceKey}/pages`;
 
 export const pagesApi = api.injectEndpoints({
     endpoints: (build) => ({
-        getPages: build.query<Page[], string>({
+        getPages: build.query<PageSummary[], string>({
             query: (spaceKey) => getUrl(spaceKey),
             providesTags: (_result, _error, spaceKey) => [
                 { type: tagTypes.Pages, id: spaceKey },

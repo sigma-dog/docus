@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { LuChevronRight, LuFolder } from 'react-icons/lu';
 import { TreeView } from '@chakra-ui/react';
 
-import type { Page } from 'shared/types';
+import type { PageSummary } from 'shared/types';
 
 import { CreateNodeMenu } from './CreateNodeMenu';
 import { EmptyFolder } from './EmptyFolder';
@@ -11,7 +11,7 @@ import { NodeContextMenu } from './NodeContextMenu';
 type TreeBranchItemProps = {
     onCreatePage?: (parentId?: string) => void;
     onCreateFolder?: (parentId?: string) => void;
-    node: Page;
+    node: PageSummary;
 };
 
 export const TreeBranchItem: FC<TreeBranchItemProps> = ({

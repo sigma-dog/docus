@@ -6,10 +6,9 @@ type PageAuthor = {
     avatarUrl: TypeOrNull<string>;
 };
 
-export type Page = {
+export type PageSummary = {
     id: string;
     title: string;
-    content: TypeOrNull<string>;
     isFolder: boolean;
     position: number;
     spaceId: string;
@@ -18,5 +17,9 @@ export type Page = {
     author: PageAuthor;
     createdAt: string;
     updatedAt: string;
-    children: Page[];
+    children: PageSummary[];
+};
+
+export type Page = PageSummary & {
+    content: TypeOrNull<string>;
 };

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
     createTreeCollection,
     Spinner,
@@ -7,7 +7,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useGetPagesQuery } from 'shared/api';
-import type { Page } from 'shared/types';
+import type { PageSummary } from 'shared/types';
 
 import { TreeBranchItem } from './TreeBranchItem';
 import { TreeItem } from './TreeItem';
@@ -19,12 +19,11 @@ type Props = {
 };
 
 export const Navigation = ({ onCreatePage, onCreateFolder }: Props) => {
-    // const { orgSlug, spaceKey } = useParams<{
-    const { spaceKey } = useParams<{
+    const { orgSlug, spaceKey } = useParams<{
         orgSlug: string;
         spaceKey?: string;
     }>();
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const { expandedValue, onExpandedChange } = useTreeExpandedState(
         spaceKey ?? ''
@@ -50,7 +49,7 @@ export const Navigation = ({ onCreatePage, onCreateFolder }: Props) => {
         );
     }
 
-    const collection = createTreeCollection<Page>({
+    const collection = createTreeCollection<PageSummary>({
         nodeToValue: (node) => node.id,
         nodeToString: (node) => node.title,
         nodeToChildrenCount: (node) =>
@@ -59,7 +58,7 @@ export const Navigation = ({ onCreatePage, onCreateFolder }: Props) => {
             id: 'ROOT',
             title: 'root',
             children: pages,
-        } as Page,
+        } as PageSummary,
     });
 
     return (
@@ -67,16 +66,16 @@ export const Navigation = ({ onCreatePage, onCreateFolder }: Props) => {
             collection={collection}
             expandedValue={expandedValue}
             onExpandedChange={onExpandedChange}
-            // onSelectionChange={({ selectedValue, selectedNodes }) => {
-            // const id = selectedValue[0];
-            // if (id && orgSlug && spaceKey) {
-            //     navigate(`/${orgSlug}/${spaceKey}/pages/${id}`);
-            // }
-            // }}
+            onSelectionChange={({ selectedNodes }) => {
+                const node = selectedNodes[0];
+                if (node && !node.isFolder && orgSlug && spaceKey) {
+                    navigate(`/${orgSlug}/${spaceKey}/pages/${node.id}`);
+                }
+            }}
         >
             <TreeView.Label>Навигация</TreeView.Label>
             <TreeView.Tree>
-                <TreeView.Node<Page>
+                <TreeView.Node<PageSummary>
                     indentGuide={<TreeView.BranchIndentGuide />}
                     render={({ node, nodeState }) =>
                         nodeState.isBranch ? (
