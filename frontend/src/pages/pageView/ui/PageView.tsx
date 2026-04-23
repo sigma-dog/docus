@@ -75,6 +75,13 @@ export const PageView = () => {
         setIsEditing(false);
     };
 
+    const handleRenameTitle = async (title: string) => {
+        if (!spaceKey || !pageId) {
+            return;
+        }
+        await updatePage({ spaceKey, pageId, body: { title } });
+    };
+
     const handleCancel = () => {
         if (editor && page) {
             editor.commands.setContent(page.content ?? '');
@@ -110,6 +117,7 @@ export const PageView = () => {
                 isSaving={isSaving}
                 handleSave={handleSave}
                 handleCancel={handleCancel}
+                handleRenameTitle={handleRenameTitle}
                 setIsEditing={setIsEditing}
             />
 

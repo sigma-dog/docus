@@ -1,8 +1,10 @@
 import type { FC } from 'react';
 import { LuPencil } from 'react-icons/lu';
-import { Button, HStack, Text } from '@chakra-ui/react';
+import { Button, HStack } from '@chakra-ui/react';
 
 import type { Page } from 'shared/types';
+
+import { TitleRename } from './TitleRename';
 
 type HeaderProps = {
     page: Page;
@@ -10,6 +12,7 @@ type HeaderProps = {
     isSaving: boolean;
     handleSave: () => void;
     handleCancel: () => void;
+    handleRenameTitle: (title: string) => void;
     setIsEditing: (value: boolean) => void;
 };
 
@@ -19,14 +22,13 @@ export const Header: FC<HeaderProps> = ({
     isSaving,
     handleSave,
     handleCancel,
+    handleRenameTitle,
     setIsEditing,
 }) => {
     return (
         <HStack justify="space-between" mb={6}>
-            <Text fontSize="2xl" fontWeight="bold">
-                {page.title}
-            </Text>
-            <HStack gap={2}>
+            <TitleRename title={page.title} onRename={handleRenameTitle} />
+            <HStack gap={2} flexShrink={0}>
                 {isEditing ? (
                     <>
                         <Button
