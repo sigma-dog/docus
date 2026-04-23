@@ -81,6 +81,18 @@ const proseMirrorBaseCss = defineStyle({
             borderWidth: '1px',
             borderColor: 'gray.700',
             boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.03)',
+            position: 'relative',
+        },
+        '& pre[data-language]::before': {
+            content: 'attr(data-language)',
+            position: 'absolute',
+            top: '2',
+            right: '3',
+            fontSize: 'xs',
+            fontFamily: 'mono',
+            color: 'gray.500',
+            pointerEvents: 'none',
+            userSelect: 'none',
         },
         '& pre code': {
             bg: 'transparent',

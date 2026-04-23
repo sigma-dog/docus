@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Center, Spinner, Text } from '@chakra-ui/react';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { Color } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
@@ -11,11 +12,14 @@ import { TextStyleKit } from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { all, createLowlight } from 'lowlight';
 
 import { useGetPageQuery, useUpdatePageMutation } from 'shared/api';
 
 import { Editor } from './Editor';
 import { Header } from './Header';
+
+const lowlight = createLowlight(all);
 
 export const PageView = () => {
     const { orgSlug, spaceKey, pageId } = useParams<{
@@ -35,7 +39,11 @@ export const PageView = () => {
 
     const editor = useEditor({
         extensions: [
-            StarterKit.configure({ link: { openOnClick: false } }),
+            StarterKit.configure({
+                link: { openOnClick: false },
+                codeBlock: false,
+            }),
+            CodeBlockLowlight.configure({ lowlight }),
             TextAlign.configure({ types: ['paragraph', 'heading'] }),
             TextStyleKit,
             Underline,
@@ -114,14 +122,17 @@ export const PageView = () => {
             <Header
                 page={page}
                 isEditing={isEditing}
-                isSaving={isSaving}
-                handleSave={handleSave}
-                handleCancel={handleCancel}
                 handleRenameTitle={handleRenameTitle}
                 setIsEditing={setIsEditing}
             />
 
-            <Editor editor={editor} isEditing={isEditing} />
+            <Editor
+                editor={editor}
+                isEditing={isEditing}
+                isSaving={isSaving}
+                handleSave={handleSave}
+                handleCancel={handleCancel}
+            />
         </Box>
     );
 };

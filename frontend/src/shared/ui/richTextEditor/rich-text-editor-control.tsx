@@ -20,6 +20,7 @@ import {
     LuQuote,
     LuRotateCcw,
     LuRotateCw,
+    LuSquareCode,
     LuStrikethrough,
     LuSubscript,
     LuSuperscript,
@@ -467,6 +468,54 @@ export const OrderedList = createBooleanControl({
     command: (editor) => editor.chain().focus().toggleOrderedList().run(),
     getVariant: (editor) =>
         editor.isActive('orderedList') ? 'subtle' : 'ghost',
+});
+
+const CODE_LANGUAGE_OPTIONS = [
+    { value: '', label: 'Auto' },
+    { value: 'bash', label: 'Bash' },
+    { value: 'c', label: 'C' },
+    { value: 'cpp', label: 'C++' },
+    { value: 'csharp', label: 'C#' },
+    { value: 'css', label: 'CSS' },
+    { value: 'diff', label: 'Diff' },
+    { value: 'go', label: 'Go' },
+    { value: 'graphql', label: 'GraphQL' },
+    { value: 'html', label: 'HTML' },
+    { value: 'java', label: 'Java' },
+    { value: 'javascript', label: 'JavaScript' },
+    { value: 'json', label: 'JSON' },
+    { value: 'kotlin', label: 'Kotlin' },
+    { value: 'lua', label: 'Lua' },
+    { value: 'markdown', label: 'Markdown' },
+    { value: 'php', label: 'PHP' },
+    { value: 'python', label: 'Python' },
+    { value: 'ruby', label: 'Ruby' },
+    { value: 'rust', label: 'Rust' },
+    { value: 'scss', label: 'SCSS' },
+    { value: 'shell', label: 'Shell' },
+    { value: 'sql', label: 'SQL' },
+    { value: 'swift', label: 'Swift' },
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'xml', label: 'XML' },
+    { value: 'yaml', label: 'YAML' },
+];
+
+export const CodeBlockLanguage = createSelectControl({
+    label: 'Language',
+    width: '100px',
+    options: CODE_LANGUAGE_OPTIONS,
+    isDisabled: (editor) => !editor.isActive('codeBlock'),
+    getValue: (editor) =>
+        (editor.getAttributes('codeBlock').language as string) || '',
+    command: (editor, value) =>
+        editor.chain().focus().setCodeBlock({ language: value }).run(),
+});
+
+export const CodeBlock = createBooleanControl({
+    label: 'Code Block',
+    icon: LuSquareCode,
+    command: (editor) => editor.chain().focus().toggleCodeBlock().run(),
+    getVariant: (editor) => (editor.isActive('codeBlock') ? 'subtle' : 'ghost'),
 });
 
 export const Blockquote = createBooleanControl({
