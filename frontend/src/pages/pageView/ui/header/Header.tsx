@@ -4,6 +4,7 @@ import { Button, HStack } from '@chakra-ui/react';
 
 import type { Page } from 'shared/types';
 
+import { LastEdited } from './lastEdited/LastEdited';
 import { TitleRename } from './TitleRename';
 
 type HeaderProps = {
@@ -23,15 +24,17 @@ export const Header: FC<HeaderProps> = ({
         <HStack justify="space-between" mb={6}>
             <TitleRename title={page.title} onRename={handleRenameTitle} />
             {!isEditing && (
-                <Button
-                    size="sm"
-                    variant="subtle"
-                    flexShrink={0}
-                    onClick={() => setIsEditing(true)}
-                >
-                    <LuPencil />
-                    Редактировать
-                </Button>
+                <HStack gap={3} flexShrink={0}>
+                    <LastEdited page={page} />
+                    <Button
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => setIsEditing(true)}
+                    >
+                        <LuPencil />
+                        Редактировать
+                    </Button>
+                </HStack>
             )}
         </HStack>
     );

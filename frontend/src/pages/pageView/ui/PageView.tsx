@@ -16,9 +16,9 @@ import { all, createLowlight } from 'lowlight';
 
 import { useGetPageQuery, useUpdatePageMutation } from 'shared/api';
 
+import { Header } from './header/Header';
 import { Breadcrumbs } from './Breadcrumbs';
 import { Editor } from './Editor';
-import { Header } from './Header';
 
 const lowlight = createLowlight(all);
 
