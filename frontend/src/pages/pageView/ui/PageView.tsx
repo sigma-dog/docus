@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Center, Spinner, Text } from '@chakra-ui/react';
+import { Box, Center, Spinner, Stack, Text } from '@chakra-ui/react';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { Color } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
@@ -16,6 +16,7 @@ import { all, createLowlight } from 'lowlight';
 
 import { useGetPageQuery, useUpdatePageMutation } from 'shared/api';
 
+import { Breadcrumbs } from './Breadcrumbs';
 import { Editor } from './Editor';
 import { Header } from './Header';
 
@@ -118,21 +119,31 @@ export const PageView = () => {
     }
 
     return (
-        <Box flex="1" overflowY="auto" bg="bg.subtle" py={10} px={6}>
-            <Header
-                page={page}
-                isEditing={isEditing}
-                handleRenameTitle={handleRenameTitle}
-                setIsEditing={setIsEditing}
-            />
+        <Box flex="1" overflowY="auto" bg="bg.subtle" p={8}>
+            <Stack gap={6}>
+                <Breadcrumbs
+                    orgSlug={orgSlug}
+                    spaceKey={spaceKey}
+                    pageId={pageId}
+                />
 
-            <Editor
-                editor={editor}
-                isEditing={isEditing}
-                isSaving={isSaving}
-                handleSave={handleSave}
-                handleCancel={handleCancel}
-            />
+                <Stack gap={2}>
+                    <Header
+                        page={page}
+                        isEditing={isEditing}
+                        handleRenameTitle={handleRenameTitle}
+                        setIsEditing={setIsEditing}
+                    />
+
+                    <Editor
+                        editor={editor}
+                        isEditing={isEditing}
+                        isSaving={isSaving}
+                        handleSave={handleSave}
+                        handleCancel={handleCancel}
+                    />
+                </Stack>
+            </Stack>
         </Box>
     );
 };
