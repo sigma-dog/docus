@@ -94,21 +94,24 @@ model SpaceMember {
 }
 
 model Page {
-  id        String   @id @default(uuid())
-  title     String
-  icon      String?
-  content   String?
-  isFolder  Boolean  @default(false)
-  position  Int      @default(0)
-  spaceId   String
-  parentId  String?
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  author    User     @relation(fields: [authorId], references: [id])
-  parent    Page?    @relation("PageTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Page[]   @relation("PageTree")
-  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  id           String                      @id @default(uuid())
+  title        String
+  icon         String?
+  content      String?
+  isFolder     Boolean                     @default(false)
+  position     Int                         @default(0)
+  spaceId      String
+  parentId     String?
+  authorId     String
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+  searchVector Unsupported("tsvector")?
+  author       User                        @relation(fields: [authorId], references: [id])
+  parent       Page?                       @relation("PageTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children     Page[]                      @relation("PageTree")
+  space        Space                       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([searchVector], type: Gin, map: "page_search_vector_gin_idx")
 }
 
 enum Role {

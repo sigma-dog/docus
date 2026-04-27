@@ -24,3 +24,16 @@ export type PageSummary = {
 export type Page = PageSummary & {
     content: TypeOrNull<string>;
 };
+
+export type SearchSnippet = {
+    before: string;
+    match: string;
+    after: string;
+};
+
+export type SearchResult = {
+    id: string;
+    title: string;
+    spaceKey: string;
+    snippet: SearchSnippet | null;
+};

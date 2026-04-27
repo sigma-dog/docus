@@ -10,4 +10,5 @@ export {
     useGetOrgSpacesQuery,
     useCreateInviteMutation,
     useJoinOrganizationMutation,
+    useSearchOrgPagesQuery,
 } from './organizationsApi';

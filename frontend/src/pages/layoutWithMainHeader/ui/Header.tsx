@@ -1,12 +1,7 @@
-import { LuBell, LuSearch, LuSettings } from 'react-icons/lu';
-import {
-    Avatar,
-    HStack,
-    Icon,
-    Input,
-    InputGroup,
-    Tabs,
-} from '@chakra-ui/react';
+import { LuBell, LuSettings } from 'react-icons/lu';
+import { Avatar, HStack, Icon, Tabs } from '@chakra-ui/react';
+
+import { SearchBox } from './SearchBox';
 
 const tabs = [
     { value: 'home', label: 'Главная' },
@@ -42,20 +37,7 @@ export const Header = () => {
             </HStack>
 
             <HStack gap={2} flexShrink={0}>
-                <InputGroup
-                    startElement={
-                        <Icon color="fg.subtle">
-                            <LuSearch />
-                        </Icon>
-                    }
-                >
-                    <Input
-                        placeholder="Поиск информации..."
-                        variant="subtle"
-                        size="sm"
-                        w="322px"
-                    />
-                </InputGroup>
+                <SearchBox />
                 <Icon color="fg.muted" cursor="pointer" boxSize={5}>
                     <LuBell />
                 </Icon>

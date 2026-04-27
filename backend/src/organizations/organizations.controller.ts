@@ -8,6 +8,7 @@ import {
     Param,
     Patch,
     Post,
+    Query,
     UseGuards,
 } from '@nestjs/common';
 
@@ -45,7 +46,7 @@ export class OrganizationsController {
     update(
         @Param('slug') slug: string,
         @CurrentUser() user: AuthUser,
-        @Body() dto: UpdateOrganizationDto,
+        @Body() dto: UpdateOrganizationDto
     ) {
         return this.organizationsService.update(slug, user.id, dto);
     }
@@ -60,7 +61,7 @@ export class OrganizationsController {
     addMember(
         @Param('slug') slug: string,
         @CurrentUser() user: AuthUser,
-        @Body() dto: AddOrgMemberDto,
+        @Body() dto: AddOrgMemberDto
     ) {
         return this.organizationsService.addMember(slug, user.id, dto);
     }
@@ -70,9 +71,22 @@ export class OrganizationsController {
     removeMember(
         @Param('slug') slug: string,
         @Param('userId') targetUserId: string,
-        @CurrentUser() user: AuthUser,
+        @CurrentUser() user: AuthUser
     ) {
-        return this.organizationsService.removeMember(slug, user.id, targetUserId);
+        return this.organizationsService.removeMember(
+            slug,
+            user.id,
+            targetUserId
+        );
+    }
+
+    @Get(':slug/pages/search')
+    searchPages(
+        @Param('slug') slug: string,
+        @CurrentUser() user: AuthUser,
+        @Query('q') q: string
+    ) {
+        return this.organizationsService.searchPages(slug, user.id, q);
     }
 
     @Get(':slug/spaces')
@@ -84,7 +98,7 @@ export class OrganizationsController {
     createInvite(
         @Param('slug') slug: string,
         @CurrentUser() user: AuthUser,
-        @Body() dto: CreateInviteDto,
+        @Body() dto: CreateInviteDto
     ) {
         return this.organizationsService.createInvite(slug, user.id, dto);
     }

@@ -3,6 +3,7 @@ import type {
     OrganizationInvite,
     OrgMember,
     OrgRole,
+    SearchResult,
     Space,
 } from '../../types';
 import { api } from '../api';
@@ -132,6 +133,14 @@ export const organizationsApi = api.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.Organizations],
         }),
+
+        searchOrgPages: build.query<
+            SearchResult[],
+            { slug: string; q: string }
+        >({
+            query: ({ slug, q }) =>
+                `${getUrl()}/${slug}/pages/search?q=${encodeURIComponent(q)}`,
+        }),
     }),
     overrideExisting: false,
 });
@@ -147,4 +156,5 @@ export const {
     useGetOrgSpacesQuery,
     useCreateInviteMutation,
     useJoinOrganizationMutation,
+    useSearchOrgPagesQuery,
 } = organizationsApi;
