@@ -96,6 +96,7 @@ model SpaceMember {
 model Page {
   id        String   @id @default(uuid())
   title     String
+  icon      String?
   content   String?
   isFolder  Boolean  @default(false)
   position  Int      @default(0)

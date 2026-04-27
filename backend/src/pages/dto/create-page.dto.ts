@@ -14,6 +14,10 @@ export class CreatePageDto {
 
     @IsOptional()
     @IsString()
+    icon?: string;
+
+    @IsOptional()
+    @IsString()
     content?: string;
 
     @IsOptional()

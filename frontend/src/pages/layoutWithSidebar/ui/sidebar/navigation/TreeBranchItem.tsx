@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { LuChevronRight, LuFolder } from 'react-icons/lu';
-import { TreeView } from '@chakra-ui/react';
+import { Box, TreeView } from '@chakra-ui/react';
 
 import type { PageSummary } from 'shared/types';
 
@@ -21,13 +21,19 @@ export const TreeBranchItem: FC<TreeBranchItemProps> = ({
 }) => {
     return (
         <>
-            <TreeView.BranchControl alignItems="flex-start" role="group" pr={1}>
+            <TreeView.BranchControl alignItems="center" role="group" pr={1}>
                 <TreeView.BranchTrigger>
                     <TreeView.BranchIndicator asChild>
                         <LuChevronRight />
                     </TreeView.BranchIndicator>
                 </TreeView.BranchTrigger>
-                <LuFolder />
+                {node.icon ? (
+                    <Box as="span" lineHeight="1" fontSize="sm">
+                        {node.icon}
+                    </Box>
+                ) : (
+                    <LuFolder />
+                )}
                 <TreeView.BranchText flex="1">{node.title}</TreeView.BranchText>
                 <CreateNodeMenu
                     nodeId={node.id}
@@ -37,6 +43,7 @@ export const TreeBranchItem: FC<TreeBranchItemProps> = ({
                 <NodeContextMenu
                     nodeId={node.id}
                     nodeTitle={node.title}
+                    nodeIcon={node.icon}
                     isFolder={node.isFolder}
                 />
             </TreeView.BranchControl>

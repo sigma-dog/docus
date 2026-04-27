@@ -15,6 +15,10 @@ export class UpdatePageDto {
 
     @IsOptional()
     @IsString()
+    icon?: string;
+
+    @IsOptional()
+    @IsString()
     content?: string;
 
     @IsOptional()

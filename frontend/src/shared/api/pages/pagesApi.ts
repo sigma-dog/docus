@@ -12,6 +12,7 @@ type CreatePageBody = {
 
 type UpdatePageBody = {
     title?: string;
+    icon?: string | null;
     content?: string;
     position?: number;
 };

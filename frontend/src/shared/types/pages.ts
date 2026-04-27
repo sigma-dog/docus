@@ -9,6 +9,7 @@ type PageAuthor = {
 export type PageSummary = {
     id: string;
     title: string;
+    icon: TypeOrNull<string>;
     isFolder: boolean;
     position: number;
     spaceId: string;

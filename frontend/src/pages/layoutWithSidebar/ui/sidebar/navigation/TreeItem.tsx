@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { LuDot, LuFile, LuFolder } from 'react-icons/lu';
-import { TreeView } from '@chakra-ui/react';
+import { Box, TreeView } from '@chakra-ui/react';
 
 import type { PageSummary } from 'shared/types';
 
@@ -19,10 +19,25 @@ export const TreeItem: FC<TreeItemProps> = ({
     node,
 }) => {
     return (
-        <TreeView.Item role="group" pr={1}>
+        <TreeView.Item
+            title={node.title}
+            alignItems="center"
+            role="group"
+            pr={1}
+        >
             <LuDot />
-            {node.isFolder ? <LuFolder /> : <LuFile />}
-            <TreeView.ItemText flex="1">{node.title}</TreeView.ItemText>
+            {node.icon ? (
+                <Box as="span" lineHeight="1" fontSize="sm">
+                    {node.icon}
+                </Box>
+            ) : node.isFolder ? (
+                <LuFolder />
+            ) : (
+                <LuFile />
+            )}
+            <TreeView.ItemText truncate flex="1">
+                {node.title}
+            </TreeView.ItemText>
             <CreateNodeMenu
                 nodeId={node.parentId ?? undefined}
                 onCreatePage={onCreatePage}
@@ -31,6 +46,7 @@ export const TreeItem: FC<TreeItemProps> = ({
             <NodeContextMenu
                 nodeId={node.id}
                 nodeTitle={node.title}
+                nodeIcon={node.icon}
                 isFolder={node.isFolder}
             />
         </TreeView.Item>

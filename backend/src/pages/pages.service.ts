@@ -28,6 +28,7 @@ export class PagesService {
         return this.prisma.page.create({
             data: {
                 title: dto.title,
+                icon: dto.icon,
                 content: dto.content,
                 isFolder: dto.isFolder ?? false,
                 position: dto.position ?? 0,
