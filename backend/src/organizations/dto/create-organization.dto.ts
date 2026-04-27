@@ -1,16 +1,23 @@
-import { IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+    IsOptional,
+    IsString,
+    Matches,
+    MaxLength,
+    MinLength,
+} from 'class-validator';
 
 export class CreateOrganizationDto {
     @IsString()
     @MinLength(1)
     @MaxLength(100)
-    name: string;
+    name!: string;
 
     @IsString()
     @Matches(/^[a-z0-9-]{2,50}$/, {
-        message: 'slug must be 2–50 lowercase letters, digits, or hyphens (e.g. my-org)',
+        message:
+            'slug must be 2–50 lowercase letters, digits, or hyphens (e.g. my-org)',
     })
-    slug: string;
+    slug!: string;
 
     @IsOptional()
     @IsString()

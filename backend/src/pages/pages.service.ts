@@ -57,7 +57,12 @@ export class PagesService {
                     select: { id: true, username: true, avatarUrl: true },
                 },
             },
-            orderBy: [{ parentId: 'asc' }, { isFolder: 'desc' }, { position: 'asc' }, { createdAt: 'asc' }],
+            orderBy: [
+                { parentId: 'asc' },
+                { isFolder: 'desc' },
+                { position: 'asc' },
+                { createdAt: 'asc' },
+            ],
         });
 
         return buildTree(pages);
