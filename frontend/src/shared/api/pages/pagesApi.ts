@@ -22,19 +22,27 @@ type MovePageBody = {
     position?: number;
 };
 
-const getUrl = (spaceKey: string) => `spaces/${spaceKey}/pages`;
+const getUrl = (orgSlug: string, spaceKey: string) =>
+    `organizations/${orgSlug}/spaces/${spaceKey}/pages`;
 
 export const pagesApi = api.injectEndpoints({
     endpoints: (build) => ({
-        getPages: build.query<PageSummary[], string>({
-            query: (spaceKey) => getUrl(spaceKey),
-            providesTags: (_result, _error, spaceKey) => [
-                { type: tagTypes.Pages, id: spaceKey },
+        getPages: build.query<
+            PageSummary[],
+            { orgSlug: string; spaceKey: string }
+        >({
+            query: ({ orgSlug, spaceKey }) => getUrl(orgSlug, spaceKey),
+            providesTags: (_result, _error, { orgSlug, spaceKey }) => [
+                { type: tagTypes.Pages, id: `${orgSlug}:${spaceKey}` },
             ],
         }),
 
-        getPage: build.query<Page, { spaceKey: string; pageId: string }>({
-            query: ({ spaceKey, pageId }) => `${getUrl(spaceKey)}/${pageId}`,
+        getPage: build.query<
+            Page,
+            { orgSlug: string; spaceKey: string; pageId: string }
+        >({
+            query: ({ orgSlug, spaceKey, pageId }) =>
+                `${getUrl(orgSlug, spaceKey)}/${pageId}`,
             providesTags: (_result, _error, { pageId }) => [
                 { type: tagTypes.Pages, id: pageId },
             ],
@@ -42,54 +50,71 @@ export const pagesApi = api.injectEndpoints({
 
         createPage: build.mutation<
             Page,
-            { spaceKey: string; body: CreatePageBody }
+            { orgSlug: string; spaceKey: string; body: CreatePageBody }
         >({
-            query: ({ spaceKey, body }) => ({
-                url: getUrl(spaceKey),
+            query: ({ orgSlug, spaceKey, body }) => ({
+                url: getUrl(orgSlug, spaceKey),
                 method: apiMethods.post,
                 body,
             }),
-            invalidatesTags: (_result, _error, { spaceKey }) => [
-                { type: tagTypes.Pages, id: spaceKey },
+            invalidatesTags: (_result, _error, { orgSlug, spaceKey }) => [
+                { type: tagTypes.Pages, id: `${orgSlug}:${spaceKey}` },
             ],
         }),
 
         updatePage: build.mutation<
             Page,
-            { spaceKey: string; pageId: string; body: UpdatePageBody }
+            {
+                orgSlug: string;
+                spaceKey: string;
+                pageId: string;
+                body: UpdatePageBody;
+            }
         >({
-            query: ({ spaceKey, pageId, body }) => ({
-                url: `${getUrl(spaceKey)}/${pageId}`,
+            query: ({ orgSlug, spaceKey, pageId, body }) => ({
+                url: `${getUrl(orgSlug, spaceKey)}/${pageId}`,
                 method: apiMethods.patch,
                 body,
             }),
-            invalidatesTags: (_result, _error, { spaceKey, pageId }) => [
-                { type: tagTypes.Pages, id: spaceKey },
+            invalidatesTags: (
+                _result,
+                _error,
+                { orgSlug, spaceKey, pageId }
+            ) => [
+                { type: tagTypes.Pages, id: `${orgSlug}:${spaceKey}` },
                 { type: tagTypes.Pages, id: pageId },
             ],
         }),
 
-        deletePage: build.mutation<void, { spaceKey: string; pageId: string }>({
-            query: ({ spaceKey, pageId }) => ({
-                url: `${getUrl(spaceKey)}/${pageId}`,
+        deletePage: build.mutation<
+            void,
+            { orgSlug: string; spaceKey: string; pageId: string }
+        >({
+            query: ({ orgSlug, spaceKey, pageId }) => ({
+                url: `${getUrl(orgSlug, spaceKey)}/${pageId}`,
                 method: apiMethods.delete,
             }),
-            invalidatesTags: (_result, _error, { spaceKey }) => [
-                { type: tagTypes.Pages, id: spaceKey },
+            invalidatesTags: (_result, _error, { orgSlug, spaceKey }) => [
+                { type: tagTypes.Pages, id: `${orgSlug}:${spaceKey}` },
             ],
         }),
 
         movePage: build.mutation<
             Page,
-            { spaceKey: string; pageId: string; body: MovePageBody }
+            {
+                orgSlug: string;
+                spaceKey: string;
+                pageId: string;
+                body: MovePageBody;
+            }
         >({
-            query: ({ spaceKey, pageId, body }) => ({
-                url: `${getUrl(spaceKey)}/${pageId}/move`,
+            query: ({ orgSlug, spaceKey, pageId, body }) => ({
+                url: `${getUrl(orgSlug, spaceKey)}/${pageId}/move`,
                 method: apiMethods.patch,
                 body,
             }),
-            invalidatesTags: (_result, _error, { spaceKey }) => [
-                { type: tagTypes.Pages, id: spaceKey },
+            invalidatesTags: (_result, _error, { orgSlug, spaceKey }) => [
+                { type: tagTypes.Pages, id: `${orgSlug}:${spaceKey}` },
             ],
         }),
     }),

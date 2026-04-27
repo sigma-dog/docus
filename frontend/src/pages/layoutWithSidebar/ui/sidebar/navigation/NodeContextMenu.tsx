@@ -31,7 +31,10 @@ export const NodeContextMenu: FC<Props> = ({
     nodeIcon,
     isFolder,
 }) => {
-    const { spaceKey } = useParams<{ spaceKey?: string }>();
+    const { orgSlug, spaceKey } = useParams<{
+        orgSlug?: string;
+        spaceKey?: string;
+    }>();
     const [menuEverOpened, setMenuEverOpened] = useState(false);
     const [renameOpen, setRenameOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -53,10 +56,11 @@ export const NodeContextMenu: FC<Props> = ({
     };
 
     const handleRenameSubmit = async () => {
-        if (!title.trim() || !spaceKey) {
+        if (!title.trim() || !orgSlug || !spaceKey) {
             return;
         }
         await updatePage({
+            orgSlug,
             spaceKey,
             pageId: nodeId,
             body: { title: title.trim() },
@@ -65,27 +69,37 @@ export const NodeContextMenu: FC<Props> = ({
     };
 
     const handleDeleteConfirm = async () => {
-        if (!spaceKey) {
+        if (!orgSlug || !spaceKey) {
             return;
         }
-        await deletePage({ spaceKey, pageId: nodeId });
+        await deletePage({ orgSlug, spaceKey, pageId: nodeId });
         setDeleteOpen(false);
     };
 
     const handleEmojiSelect = async (emoji: string) => {
-        if (!spaceKey) {
+        if (!orgSlug || !spaceKey) {
             return;
         }
-        await updatePage({ spaceKey, pageId: nodeId, body: { icon: emoji } });
+        await updatePage({
+            orgSlug,
+            spaceKey,
+            pageId: nodeId,
+            body: { icon: emoji },
+        });
         setEmojiOpen(false);
     };
 
     const handleRemoveIcon = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!spaceKey) {
+        if (!orgSlug || !spaceKey) {
             return;
         }
-        await updatePage({ spaceKey, pageId: nodeId, body: { icon: null } });
+        await updatePage({
+            orgSlug,
+            spaceKey,
+            pageId: nodeId,
+            body: { icon: null },
+        });
     };
 
     return (

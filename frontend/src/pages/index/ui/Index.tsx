@@ -30,9 +30,8 @@ const Index = () => {
         }
 
         const lastOrg = getLastOrgSlug();
-        const lastSpace = getLastSpaceKey();
-
         const targetOrg = orgs.find((o) => o.slug === lastOrg) ?? orgs[0];
+        const lastSpace = getLastSpaceKey(targetOrg.slug);
 
         if (lastSpace) {
             navigate(`/${targetOrg.slug}/${lastSpace}`);

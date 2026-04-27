@@ -101,6 +101,7 @@ export const Sidebar = () => {
                         />
                         {isExpanded && (
                             <Navigation
+                                key={`${orgSlug}:${spaceKey}`}
                                 onCreatePage={(parentId) =>
                                     openCreate(false, parentId)
                                 }
@@ -115,10 +116,11 @@ export const Sidebar = () => {
                 <SidebarFooter isExpanded={isExpanded} />
             </Flex>
 
-            {spaceKey && createIntent && (
+            {orgSlug && spaceKey && createIntent && (
                 <CreatePageOrFolderDialog
                     isOpen
                     onClose={() => setCreateIntent(null)}
+                    orgSlug={orgSlug}
                     spaceKey={spaceKey}
                     parentId={createIntent.parentId}
                     isFolder={createIntent.isFolder}

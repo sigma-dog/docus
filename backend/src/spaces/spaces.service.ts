@@ -161,9 +161,12 @@ export class SpacesService {
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
-    async getSpaceOrThrow(key: string) {
+    async getSpaceOrThrow(key: string, orgSlug?: string) {
         const space = await this.prisma.space.findFirst({
-            where: { key },
+            where: {
+                key,
+                ...(orgSlug ? { organization: { slug: orgSlug } } : {}),
+            },
             include: { members: true },
         });
         if (!space) throw new NotFoundException(`Space "${key}" not found`);

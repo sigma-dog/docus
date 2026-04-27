@@ -29,7 +29,7 @@ export const OrgRoute = () => {
         return <Outlet />;
     }
 
-    const lastKey = getLastSpaceKey();
+    const lastKey = getLastSpaceKey(orgSlug!);
     const target = spaces.find((s) => s.key === lastKey) ?? spaces[0];
     return <Navigate to={`/${orgSlug}/${target.key}`} replace />;
 };

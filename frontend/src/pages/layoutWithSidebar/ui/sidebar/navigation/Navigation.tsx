@@ -29,9 +29,10 @@ export const Navigation = ({ onCreatePage, onCreateFolder }: Props) => {
         spaceKey ?? ''
     );
 
-    const { data: pages = [], isLoading } = useGetPagesQuery(spaceKey ?? '', {
-        skip: !spaceKey,
-    });
+    const { data: pages = [], isLoading } = useGetPagesQuery(
+        { orgSlug: orgSlug ?? '', spaceKey: spaceKey ?? '' },
+        { skip: !spaceKey || !orgSlug }
+    );
 
     if (!spaceKey) {
         return null;

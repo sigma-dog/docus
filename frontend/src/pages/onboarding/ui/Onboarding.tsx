@@ -36,8 +36,8 @@ const Onboarding = () => {
 
     if (orgs?.length) {
         const lastOrg = getLastOrgSlug();
-        const lastSpace = getLastSpaceKey();
         const targetOrg = orgs.find((o) => o.slug === lastOrg) ?? orgs[0];
+        const lastSpace = getLastSpaceKey(targetOrg.slug);
 
         if (lastSpace) {
             return <Navigate to={`/${targetOrg.slug}/${lastSpace}`} replace />;

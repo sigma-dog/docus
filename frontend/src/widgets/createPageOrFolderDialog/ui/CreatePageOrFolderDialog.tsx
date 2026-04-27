@@ -18,6 +18,7 @@ import { useCreatePageMutation } from 'shared/api';
 type CreatePageOrFolderDialogProps = {
     isOpen: boolean;
     onClose: () => void;
+    orgSlug: string;
     spaceKey: string;
     parentId?: string;
     isFolder?: boolean;
@@ -26,6 +27,7 @@ type CreatePageOrFolderDialogProps = {
 export const CreatePageOrFolderDialog: FC<CreatePageOrFolderDialogProps> = ({
     isOpen,
     onClose,
+    orgSlug,
     spaceKey,
     parentId,
     isFolder = false,
@@ -45,6 +47,7 @@ export const CreatePageOrFolderDialog: FC<CreatePageOrFolderDialogProps> = ({
         }
 
         await createPage({
+            orgSlug,
             spaceKey,
             body: { title: title.trim(), parentId, isFolder },
         });

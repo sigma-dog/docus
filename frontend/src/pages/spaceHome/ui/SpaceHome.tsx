@@ -47,10 +47,8 @@ export const SpaceHome = () => {
         organizationSlug: orgSlug!,
     });
     const { data: pages = [], isLoading: pagesLoading } = useGetPagesQuery(
-        spaceKey!,
-        {
-            skip: !spaceKey,
-        }
+        { orgSlug: orgSlug!, spaceKey: spaceKey! },
+        { skip: !spaceKey || !orgSlug }
     );
 
     if (orgLoading || spaceLoading) {
@@ -178,8 +176,9 @@ export const SpaceHome = () => {
                 )}
             </Stack>
 
-            {spaceKey && (
+            {orgSlug && spaceKey && (
                 <CreatePageOrFolderDialog
+                    orgSlug={orgSlug}
                     isOpen={isCreatePageOpen}
                     onClose={() => setIsCreatePageOpen(false)}
                     spaceKey={spaceKey}

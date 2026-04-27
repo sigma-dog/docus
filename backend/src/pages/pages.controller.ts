@@ -20,60 +20,69 @@ import { UpdatePageDto } from './dto/update-page.dto';
 import { PagesService } from './pages.service';
 
 @UseGuards(JwtAuthGuard)
-@Controller('spaces/:key/pages')
+@Controller('organizations/:orgSlug/spaces/:key/pages')
 export class PagesController {
     constructor(private pagesService: PagesService) {}
 
     @Post()
     create(
+        @Param('orgSlug') orgSlug: string,
         @Param('key') key: string,
         @CurrentUser() user: AuthUser,
         @Body() dto: CreatePageDto
     ) {
-        return this.pagesService.create(key, user.id, dto);
+        return this.pagesService.create(key, user.id, dto, orgSlug);
     }
 
     @Get()
-    findTree(@Param('key') key: string, @CurrentUser() user: AuthUser) {
-        return this.pagesService.findTree(key, user.id);
+    findTree(
+        @Param('orgSlug') orgSlug: string,
+        @Param('key') key: string,
+        @CurrentUser() user: AuthUser
+    ) {
+        return this.pagesService.findTree(key, user.id, orgSlug);
     }
 
     @Get(':pageId')
     findOne(
+        @Param('orgSlug') orgSlug: string,
         @Param('key') key: string,
         @Param('pageId') pageId: string,
         @CurrentUser() user: AuthUser
     ) {
-        return this.pagesService.findOne(key, pageId, user.id);
+        return this.pagesService.findOne(key, pageId, user.id, orgSlug);
     }
 
     @Patch(':pageId')
     update(
+        @Param('orgSlug') orgSlug: string,
         @Param('key') key: string,
         @Param('pageId') pageId: string,
         @CurrentUser() user: AuthUser,
         @Body() dto: UpdatePageDto
     ) {
-        return this.pagesService.update(key, pageId, user.id, dto);
+        return this.pagesService.update(key, pageId, user.id, dto, orgSlug);
     }
 
     @Delete(':pageId')
     @HttpCode(HttpStatus.NO_CONTENT)
     remove(
+        @Param('orgSlug') orgSlug: string,
         @Param('key') key: string,
         @Param('pageId') pageId: string,
         @CurrentUser() user: AuthUser
     ) {
-        return this.pagesService.remove(key, pageId, user.id);
+        return this.pagesService.remove(key, pageId, user.id, orgSlug);
     }
 
     @Patch(':pageId/move')
     move(
+        @Param('orgSlug') orgSlug: string,
         @Param('key') key: string,
         @Param('pageId') pageId: string,
         @CurrentUser() user: AuthUser,
         @Body() dto: MovePageDto
     ) {
-        return this.pagesService.move(key, pageId, user.id, dto);
+        return this.pagesService.move(key, pageId, user.id, dto, orgSlug);
     }
 }

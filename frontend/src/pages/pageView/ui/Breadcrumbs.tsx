@@ -47,7 +47,7 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = ({
         key: spaceKey,
         organizationSlug: orgSlug,
     });
-    const { data: pages } = useGetPagesQuery(spaceKey);
+    const { data: pages } = useGetPagesQuery({ orgSlug, spaceKey });
 
     const ancestors = pages ? findAncestors(pages, pageId) : [];
     const ancestorPages = ancestors.slice(0, -1);
