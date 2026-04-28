@@ -15,6 +15,7 @@ const LayoutWithSidebar = lazy(() => import('pages/layoutWithSidebar'));
 const LayoutWithMainHeader = lazy(() => import('pages/layoutWithMainHeader'));
 const SpaceHome = lazy(() => import('pages/spaceHome'));
 const PageView = lazy(() => import('pages/pageView'));
+const Spaces = lazy(() => import('pages/spaces'));
 
 export const mainRouter = createBrowserRouter(
     createRoutesFromElements(
@@ -25,8 +26,9 @@ export const mainRouter = createBrowserRouter(
 
             <Route element={<ProtectedRoute />}>
                 <Route element={<LayoutWithSidebar />}>
-                    <Route path=":orgSlug" element={<OrgRoute />}>
-                        <Route element={<LayoutWithMainHeader />}>
+                    <Route element={<LayoutWithMainHeader />}>
+                        <Route path=":orgSlug" element={<OrgRoute />}>
+                            <Route path="spaces" element={<Spaces />} />
                             <Route path=":spaceKey" element={<SpaceHome />} />
                             <Route
                                 path=":spaceKey/pages/:pageId"

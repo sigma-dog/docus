@@ -2,7 +2,7 @@ import { type FC, useState } from 'react';
 import { LuPlus } from 'react-icons/lu';
 import { Button, HStack } from '@chakra-ui/react';
 
-import { CreateSpaceDialog } from './CreateSpaceDialog';
+import { CreateSpaceDialog } from 'widgets/createSpaceDialog';
 
 type CreateSpaceItemProps = {
     label: string;

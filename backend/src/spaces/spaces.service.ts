@@ -99,8 +99,8 @@ export class SpacesService {
         return space;
     }
 
-    async update(key: string, userId: string, dto: UpdateSpaceDto) {
-        const space = await this.getSpaceOrThrow(key);
+    async update(key: string, userId: string, dto: UpdateSpaceDto, orgSlug?: string) {
+        const space = await this.getSpaceOrThrow(key, orgSlug);
         this.assertAdminOrOwner(space, userId);
 
         return this.prisma.space.update({
@@ -109,8 +109,8 @@ export class SpacesService {
         });
     }
 
-    async remove(key: string, userId: string) {
-        const space = await this.getSpaceOrThrow(key);
+    async remove(key: string, userId: string, orgSlug?: string) {
+        const space = await this.getSpaceOrThrow(key, orgSlug);
         if (space.ownerId !== userId) {
             throw new ForbiddenException(
                 'Only the owner can delete this space'

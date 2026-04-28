@@ -1,15 +1,31 @@
 import { LuBell, LuSettings } from 'react-icons/lu';
+import { useMatch, useNavigate, useParams } from 'react-router-dom';
 import { Avatar, HStack, Icon, Tabs } from '@chakra-ui/react';
 
 import { SearchBox } from './SearchBox';
 
-const tabs = [
-    { value: 'home', label: 'Главная' },
-    { value: 'spaces', label: 'Пространства' },
-    { value: 'activities', label: 'Активности', disabled: true },
-];
-
 export const Header = () => {
+    const { orgSlug, spaceKey } = useParams<{
+        orgSlug: string;
+        spaceKey?: string;
+    }>();
+    const navigate = useNavigate();
+
+    const onSpacesPage = !!useMatch('/:orgSlug/spaces');
+
+    const activeTab = onSpacesPage ? 'spaces' : 'home';
+
+    const handleTabChange = (value: string) => {
+        if (!orgSlug) {
+            return;
+        }
+        if (value === 'spaces') {
+            navigate(`/${orgSlug}/spaces`);
+        } else if (value === 'home') {
+            navigate(`/${orgSlug}/${spaceKey ?? ''}`);
+        }
+    };
+
     return (
         <HStack
             justify="space-between"
@@ -20,18 +36,22 @@ export const Header = () => {
             flexShrink={0}
         >
             <HStack>
-                <Tabs.Root defaultValue="home" variant="line" h="full">
+                <Tabs.Root
+                    value={activeTab}
+                    onValueChange={(e) => handleTabChange(e.value)}
+                    variant="line"
+                    h="full"
+                >
                     <Tabs.List h="full" borderBottomWidth={0}>
-                        {tabs.map(({ value, label, disabled }) => (
-                            <Tabs.Trigger
-                                key={value}
-                                value={value}
-                                h="full"
-                                disabled={disabled}
-                            >
-                                {label}
-                            </Tabs.Trigger>
-                        ))}
+                        <Tabs.Trigger value="home" h="full">
+                            Главная
+                        </Tabs.Trigger>
+                        <Tabs.Trigger value="spaces" h="full">
+                            Пространства
+                        </Tabs.Trigger>
+                        <Tabs.Trigger value="activities" h="full" disabled>
+                            Активности
+                        </Tabs.Trigger>
                     </Tabs.List>
                 </Tabs.Root>
             </HStack>

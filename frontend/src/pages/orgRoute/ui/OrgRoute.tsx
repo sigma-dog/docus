@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useParams } from 'react-router-dom';
+import { Navigate, Outlet, useMatch, useParams } from 'react-router-dom';
 import { Center, Spinner } from '@chakra-ui/react';
 
 import { useGetSpacesQuery } from 'shared/api';
@@ -10,6 +10,8 @@ export const OrgRoute = () => {
         spaceKey?: string;
     }>();
 
+    const onSpacesPage = !!useMatch('/:orgSlug/spaces');
+
     const { data: spaces, isLoading } = useGetSpacesQuery(orgSlug!);
 
     if (isLoading) {
@@ -20,12 +22,11 @@ export const OrgRoute = () => {
         );
     }
 
-    if (spaceKey) {
+    if (onSpacesPage || spaceKey) {
         return <Outlet />;
     }
 
     if (!spaces?.length) {
-        // Орг есть, но нет пространств — показываем layout с подсказкой создать space
         return <Outlet />;
     }
 

@@ -11,6 +11,7 @@ import {
 
 import { useGetSpacesQuery } from 'shared/api';
 import type { Space } from 'shared/types';
+import { SpaceActionsMenu } from 'widgets/spaceActionsMenu';
 
 import { CreateSpaceItem } from './CreateSpaceButton';
 
@@ -92,9 +93,24 @@ export const SpaceSelect: FC<SpaceSelectProps> = ({
                             );
                         }
 
+                        const space = spaces.find(
+                            (s: Space) => s.key === item.value
+                        );
+
                         return (
                             <Select.Item key={item.value} item={item}>
-                                {item.label}
+                                <Select.ItemText>{item.label}</Select.ItemText>
+                                <HStack
+                                    ml="auto"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {space && (
+                                        <SpaceActionsMenu
+                                            space={space}
+                                            organizationSlug={organizationSlug}
+                                        />
+                                    )}
+                                </HStack>
                             </Select.Item>
                         );
                     })}

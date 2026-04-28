@@ -15,6 +15,11 @@ type UpdateSpaceBody = {
     avatarUrl?: string;
 };
 
+type SpaceActionArgs = {
+    key: string;
+    organizationSlug: string;
+};
+
 const getUrl = () => 'spaces';
 
 export const spacesApi = api.injectEndpoints({
@@ -48,10 +53,10 @@ export const spacesApi = api.injectEndpoints({
 
         updateSpace: build.mutation<
             Space,
-            { key: string; body: UpdateSpaceBody }
+            SpaceActionArgs & { body: UpdateSpaceBody }
         >({
-            query: ({ key, body }) => ({
-                url: `${getUrl()}/${key}`,
+            query: ({ key, organizationSlug, body }) => ({
+                url: `${getUrl()}/${key}?organizationSlug=${organizationSlug}`,
                 method: apiMethods.patch,
                 body,
             }),
@@ -61,9 +66,9 @@ export const spacesApi = api.injectEndpoints({
             ],
         }),
 
-        deleteSpace: build.mutation<void, string>({
-            query: (key) => ({
-                url: `${getUrl()}/${key}`,
+        deleteSpace: build.mutation<void, SpaceActionArgs>({
+            query: ({ key, organizationSlug }) => ({
+                url: `${getUrl()}/${key}?organizationSlug=${organizationSlug}`,
                 method: apiMethods.delete,
             }),
             invalidatesTags: [tagTypes.Spaces],

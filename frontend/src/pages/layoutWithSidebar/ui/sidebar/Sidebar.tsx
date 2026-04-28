@@ -85,20 +85,22 @@ export const Sidebar = () => {
                         isExpanded={isExpanded}
                     />
 
-                    {isExpanded && selectedOrg && (
+                    {isExpanded && selectedOrg && spaceKey && (
                         <SpaceSelect
-                            selectedKey={spaceKey ?? ''}
+                            selectedKey={spaceKey}
                             onSelect={handleSelectSpace}
                             organizationSlug={selectedOrg.slug}
                         />
                     )}
 
                     <Stack gap={4}>
-                        <AddButton
-                            isExpanded={isExpanded}
-                            onCreatePage={() => openCreate(false)}
-                            onCreateFolder={() => openCreate(true)}
-                        />
+                        {spaceKey && (
+                            <AddButton
+                                isExpanded={isExpanded}
+                                onCreatePage={() => openCreate(false)}
+                                onCreateFolder={() => openCreate(true)}
+                            />
+                        )}
                         {isExpanded && (
                             <Navigation
                                 key={`${orgSlug}:${spaceKey}`}

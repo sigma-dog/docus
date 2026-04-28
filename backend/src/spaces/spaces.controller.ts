@@ -51,15 +51,20 @@ export class SpacesController {
     update(
         @Param('key') key: string,
         @CurrentUser() user: AuthUser,
+        @Query('organizationSlug') organizationSlug: string,
         @Body() dto: UpdateSpaceDto
     ) {
-        return this.spacesService.update(key, user.id, dto);
+        return this.spacesService.update(key, user.id, dto, organizationSlug);
     }
 
     @Delete(':key')
     @HttpCode(HttpStatus.NO_CONTENT)
-    remove(@Param('key') key: string, @CurrentUser() user: AuthUser) {
-        return this.spacesService.remove(key, user.id);
+    remove(
+        @Param('key') key: string,
+        @CurrentUser() user: AuthUser,
+        @Query('organizationSlug') organizationSlug: string
+    ) {
+        return this.spacesService.remove(key, user.id, organizationSlug);
     }
 
     @Post(':key/members')
