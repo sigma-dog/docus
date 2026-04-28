@@ -1,5 +1,21 @@
 import type { TypeOrNull } from './utility';
 
+type HistoryAuthor = {
+    id: string;
+    username: string;
+    avatarUrl: TypeOrNull<string>;
+};
+
+export type PageHistoryEntry = {
+    id: string;
+    pageId: string;
+    authorId: string;
+    author: HistoryAuthor;
+    title: string;
+    content: TypeOrNull<string>;
+    createdAt: string;
+};
+
 type PageAuthor = {
     id: string;
     username: string;

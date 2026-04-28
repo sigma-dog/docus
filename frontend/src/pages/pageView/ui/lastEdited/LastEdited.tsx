@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Avatar, Text } from '@chakra-ui/react';
+import { Avatar, HStack, Text } from '@chakra-ui/react';
 
 import type { Page } from 'shared/types';
 
@@ -11,7 +11,7 @@ type LastEditedProps = {
 
 export const LastEdited: FC<LastEditedProps> = ({ page }) => {
     return (
-        <>
+        <HStack gap={2} alignItems="center">
             <Avatar.Root size="xs">
                 <Avatar.Image src={page.author.avatarUrl ?? undefined} />
                 <Avatar.Fallback>
@@ -21,6 +21,6 @@ export const LastEdited: FC<LastEditedProps> = ({ page }) => {
             <Text fontSize="sm" color="fg.muted" whiteSpace="nowrap">
                 {page.author.username} · {formatUpdatedAt(page.updatedAt)}
             </Text>
-        </>
+        </HStack>
     );
 };

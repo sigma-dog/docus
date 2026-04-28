@@ -1,4 +1,4 @@
-import type { Page, PageSummary } from '../../types';
+import type { Page, PageHistoryEntry, PageSummary } from '../../types';
 import { api } from '../api';
 import { apiMethods, tagTypes } from '../constants';
 
@@ -83,6 +83,7 @@ export const pagesApi = api.injectEndpoints({
             ) => [
                 { type: tagTypes.Pages, id: `${orgSlug}:${spaceKey}` },
                 { type: tagTypes.Pages, id: pageId },
+                { type: tagTypes.Pages, id: `history:${pageId}` },
             ],
         }),
 
@@ -117,6 +118,17 @@ export const pagesApi = api.injectEndpoints({
                 { type: tagTypes.Pages, id: `${orgSlug}:${spaceKey}` },
             ],
         }),
+
+        getPageHistory: build.query<
+            PageHistoryEntry[],
+            { orgSlug: string; spaceKey: string; pageId: string }
+        >({
+            query: ({ orgSlug, spaceKey, pageId }) =>
+                `${getUrl(orgSlug, spaceKey)}/${pageId}/history`,
+            providesTags: (_result, _error, { pageId }) => [
+                { type: tagTypes.Pages, id: `history:${pageId}` },
+            ],
+        }),
     }),
     overrideExisting: false,
 });
@@ -128,4 +140,5 @@ export const {
     useUpdatePageMutation,
     useDeletePageMutation,
     useMovePageMutation,
+    useGetPageHistoryQuery,
 } = pagesApi;

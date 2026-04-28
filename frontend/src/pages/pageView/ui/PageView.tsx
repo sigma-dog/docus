@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Center, Spinner, Stack, Text } from '@chakra-ui/react';
+import {
+    Box,
+    Center,
+    Grid,
+    GridItem,
+    Spinner,
+    Stack,
+    Text,
+} from '@chakra-ui/react';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Highlight from '@tiptap/extension-highlight';
 import Subscript from '@tiptap/extension-subscript';
@@ -14,6 +22,7 @@ import { all, createLowlight } from 'lowlight';
 import { useGetPageQuery, useUpdatePageMutation } from 'shared/api';
 
 import { Header } from './header/Header';
+import { HistoryPanel } from './history/HistoryPanel';
 import { Breadcrumbs } from './Breadcrumbs';
 import { Editor } from './Editor';
 
@@ -27,6 +36,7 @@ export const PageView = () => {
     }>();
 
     const [isEditing, setIsEditing] = useState(false);
+    const [isShowingHistory, setIsShowingHistory] = useState(false);
 
     const { data: page, isLoading } = useGetPageQuery(
         { orgSlug: orgSlug!, spaceKey: spaceKey!, pageId: pageId! },
@@ -44,12 +54,9 @@ export const PageView = () => {
             CodeBlockLowlight.configure({ lowlight }),
             TextAlign.configure({ types: ['paragraph', 'heading'] }),
             TextStyleKit,
-            // Underline,
             Subscript,
             Superscript,
             Highlight.configure({ multicolor: true }),
-            // Color,
-            // Link.configure({ openOnClick: false }),
         ],
         content: '',
         editable: false,
@@ -117,31 +124,55 @@ export const PageView = () => {
     }
 
     return (
-        <Box flex="1" overflowY="auto" bg="bg.subtle" p={8}>
-            <Stack gap={6}>
-                <Breadcrumbs
-                    orgSlug={orgSlug}
-                    spaceKey={spaceKey}
-                    pageId={pageId}
-                />
-
-                <Stack gap={2}>
-                    <Header
-                        page={page}
-                        isEditing={isEditing}
-                        handleRenameTitle={handleRenameTitle}
-                        setIsEditing={setIsEditing}
+        <Grid
+            flex="1"
+            templateColumns={isShowingHistory ? '1fr 320px' : '1fr'}
+            h="100%"
+            overflow="hidden"
+        >
+            <GridItem overflowY="auto" bg="bg.subtle" p={8}>
+                <Stack gap={6}>
+                    <Breadcrumbs
+                        orgSlug={orgSlug}
+                        spaceKey={spaceKey}
+                        pageId={pageId}
                     />
 
-                    <Editor
-                        editor={editor}
-                        isEditing={isEditing}
-                        isSaving={isSaving}
-                        handleSave={handleSave}
-                        handleCancel={handleCancel}
-                    />
+                    <Stack gap={2}>
+                        <Header
+                            page={page}
+                            isEditing={isEditing}
+                            isShowingHistory={isShowingHistory}
+                            handleRenameTitle={handleRenameTitle}
+                            setIsEditing={setIsEditing}
+                            setIsShowingHistory={setIsShowingHistory}
+                        />
+
+                        <Editor
+                            editor={editor}
+                            isEditing={isEditing}
+                            isSaving={isSaving}
+                            handleSave={handleSave}
+                            handleCancel={handleCancel}
+                        />
+                    </Stack>
                 </Stack>
-            </Stack>
-        </Box>
+            </GridItem>
+
+            {isShowingHistory && (
+                <GridItem borderLeftWidth="1px" overflowY="auto" bg="bg">
+                    <Box px={4} py={3} borderBottomWidth="1px">
+                        <Text fontWeight="medium" fontSize="sm">
+                            История изменений
+                        </Text>
+                    </Box>
+                    <HistoryPanel
+                        orgSlug={orgSlug}
+                        spaceKey={spaceKey}
+                        page={page}
+                    />
+                </GridItem>
+            )}
+        </Grid>
     );
 };

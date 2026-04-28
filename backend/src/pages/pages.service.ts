@@ -9,12 +9,14 @@ import { SpacesService } from '../spaces/spaces.service';
 import { CreatePageDto } from './dto/create-page.dto';
 import { MovePageDto } from './dto/move-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
+import { PageHistoryService } from './page-history.service';
 
 @Injectable()
 export class PagesService {
     constructor(
         private prisma: PrismaService,
-        private spacesService: SpacesService
+        private spacesService: SpacesService,
+        private pageHistoryService: PageHistoryService
     ) {}
 
     async create(spaceKey: string, userId: string, dto: CreatePageDto, orgSlug?: string) {
@@ -86,7 +88,14 @@ export class PagesService {
         const space = await this.spacesService.getSpaceOrThrow(spaceKey, orgSlug);
         this.assertEditor(space, userId);
 
-        await this.getPageOrThrow(pageId, space.id);
+        const existing = await this.getPageOrThrow(pageId, space.id);
+
+        await this.pageHistoryService.createSnapshot(
+            pageId,
+            userId,
+            existing.title,
+            existing.content ?? null
+        );
 
         return this.prisma.page.update({
             where: { id: pageId },

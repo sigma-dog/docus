@@ -17,12 +17,16 @@ import { type AuthUser } from '../common/types/auth.types';
 import { CreatePageDto } from './dto/create-page.dto';
 import { MovePageDto } from './dto/move-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
+import { PageHistoryService } from './page-history.service';
 import { PagesService } from './pages.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('organizations/:orgSlug/spaces/:key/pages')
 export class PagesController {
-    constructor(private pagesService: PagesService) {}
+    constructor(
+        private pagesService: PagesService,
+        private pageHistoryService: PageHistoryService
+    ) {}
 
     @Post()
     create(
@@ -84,5 +88,12 @@ export class PagesController {
         @Body() dto: MovePageDto
     ) {
         return this.pagesService.move(key, pageId, user.id, dto, orgSlug);
+    }
+
+    @Get(':pageId/history')
+    getHistory(
+        @Param('pageId') pageId: string
+    ) {
+        return this.pageHistoryService.findAll(pageId);
     }
 }

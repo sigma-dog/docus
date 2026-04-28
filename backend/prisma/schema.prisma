@@ -23,6 +23,7 @@ model User {
   memberships     SpaceMember[]
   ownedOrgs       Organization[]
   orgMemberships  OrgMember[]
+  pageHistory     PageHistory[]
 }
 
 model Organization {
@@ -110,8 +111,22 @@ model Page {
   parent       Page?                       @relation("PageTree", fields: [parentId], references: [id], onDelete: Cascade)
   children     Page[]                      @relation("PageTree")
   space        Space                       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  history      PageHistory[]
 
   @@index([searchVector], type: Gin, map: "page_search_vector_gin_idx")
+}
+
+model PageHistory {
+  id        String   @id @default(uuid())
+  pageId    String
+  authorId  String
+  title     String
+  content   String?
+  createdAt DateTime @default(now())
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id])
+
+  @@index([pageId, createdAt(sort: Desc)])
 }
 
 enum Role {
