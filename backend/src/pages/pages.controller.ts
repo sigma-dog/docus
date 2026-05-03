@@ -91,9 +91,7 @@ export class PagesController {
     }
 
     @Get(':pageId/history')
-    getHistory(
-        @Param('pageId') pageId: string
-    ) {
+    getHistory(@Param('pageId') pageId: string) {
         return this.pageHistoryService.findAll(pageId);
     }
 }

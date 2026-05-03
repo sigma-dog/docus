@@ -25,7 +25,7 @@ export const Header: FC<HeaderProps> = ({
     setIsShowingHistory,
 }) => {
     return (
-        <HStack justify="space-between" mb={6}>
+        <HStack justify="space-between" mb={6} w="full">
             <TitleRename title={page.title} onRename={handleRenameTitle} />
             {!isEditing && (
                 <HStack gap={3} flexShrink={0}>

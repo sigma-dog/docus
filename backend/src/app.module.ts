@@ -8,6 +8,7 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { PagesModule } from './pages/pages.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SpacesModule } from './spaces/spaces.module';
+import { UserSettingsModule } from './user-settings/user-settings.module';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { SpacesModule } from './spaces/spaces.module';
         SpacesModule,
         PagesModule,
         OrganizationsModule,
+        UserSettingsModule,
     ],
 })
 export class AppModule implements NestModule {

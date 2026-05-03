@@ -20,7 +20,11 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { all, createLowlight } from 'lowlight';
 
-import { useGetPageQuery, useUpdatePageMutation } from 'shared/api';
+import {
+    useGetPageQuery,
+    useGetUserSettingsQuery,
+    useUpdatePageMutation,
+} from 'shared/api';
 
 import { isPageContentEmpty } from './utils';
 import { Breadcrumbs } from '../Breadcrumbs';
@@ -40,6 +44,7 @@ export const PageView = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isShowingHistory, setIsShowingHistory] = useState(false);
+    const { data: userSettings } = useGetUserSettingsQuery();
 
     const { data: page, isLoading } = useGetPageQuery(
         { orgSlug: orgSlug!, spaceKey: spaceKey!, pageId: pageId! },
@@ -143,30 +148,35 @@ export const PageView = () => {
                         pageId={pageId}
                     />
 
-                    <Stack gap={2}>
-                        <Header
-                            page={page}
-                            isEditing={isEditing}
-                            isShowingHistory={isShowingHistory}
-                            handleRenameTitle={handleRenameTitle}
-                            setIsEditing={setIsEditing}
-                            setIsShowingHistory={setIsShowingHistory}
-                        />
-
-                        {isEmptyPage && !isEditing ? (
-                            <EmptyPageState
-                                onStartEditing={() => setIsEditing(true)}
-                            />
-                        ) : (
-                            <Editor
-                                editor={editor}
+                    <Center w="full">
+                        <Stack gap={2} alignItems="center">
+                            <Header
+                                page={page}
                                 isEditing={isEditing}
-                                isSaving={isSaving}
-                                handleSave={handleSave}
-                                handleCancel={handleCancel}
+                                isShowingHistory={isShowingHistory}
+                                handleRenameTitle={handleRenameTitle}
+                                setIsEditing={setIsEditing}
+                                setIsShowingHistory={setIsShowingHistory}
                             />
-                        )}
-                    </Stack>
+
+                            {isEmptyPage && !isEditing ? (
+                                <EmptyPageState
+                                    onStartEditing={() => setIsEditing(true)}
+                                />
+                            ) : (
+                                <Editor
+                                    editor={editor}
+                                    editorWidth={
+                                        userSettings?.editorWidth ?? 'COMPACT'
+                                    }
+                                    isEditing={isEditing}
+                                    isSaving={isSaving}
+                                    handleSave={handleSave}
+                                    handleCancel={handleCancel}
+                                />
+                            )}
+                        </Stack>
+                    </Center>
                 </Stack>
             </GridItem>
 

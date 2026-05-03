@@ -6,7 +6,12 @@ import { PrismaService } from '../prisma/prisma.service';
 export class PageHistoryService {
     constructor(private prisma: PrismaService) {}
 
-    async createSnapshot(pageId: string, authorId: string, title: string, content: string | null) {
+    async createSnapshot(
+        pageId: string,
+        authorId: string,
+        title: string,
+        content: string | null
+    ) {
         return this.prisma.pageHistory.create({
             data: { pageId, authorId, title, content: content ?? null },
         });
@@ -17,7 +22,9 @@ export class PageHistoryService {
             where: { pageId },
             orderBy: { createdAt: 'desc' },
             include: {
-                author: { select: { id: true, username: true, avatarUrl: true } },
+                author: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
             },
         });
     }

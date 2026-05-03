@@ -19,8 +19,16 @@ export class PagesService {
         private pageHistoryService: PageHistoryService
     ) {}
 
-    async create(spaceKey: string, userId: string, dto: CreatePageDto, orgSlug?: string) {
-        const space = await this.spacesService.getSpaceOrThrow(spaceKey, orgSlug);
+    async create(
+        spaceKey: string,
+        userId: string,
+        dto: CreatePageDto,
+        orgSlug?: string
+    ) {
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
         this.assertEditor(space, userId);
 
         if (dto.parentId) {
@@ -48,7 +56,10 @@ export class PagesService {
     }
 
     async findTree(spaceKey: string, userId: string, orgSlug?: string) {
-        const space = await this.spacesService.getSpaceOrThrow(spaceKey, orgSlug);
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
         this.assertViewer(space, userId);
 
         const pages = await this.prisma.page.findMany({
@@ -70,8 +81,16 @@ export class PagesService {
         return buildTree(pages);
     }
 
-    async findOne(spaceKey: string, pageId: string, userId: string, orgSlug?: string) {
-        const space = await this.spacesService.getSpaceOrThrow(spaceKey, orgSlug);
+    async findOne(
+        spaceKey: string,
+        pageId: string,
+        userId: string,
+        orgSlug?: string
+    ) {
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
         this.assertViewer(space, userId);
 
         const page = await this.getPageOrThrow(pageId, space.id);
@@ -85,7 +104,10 @@ export class PagesService {
         dto: UpdatePageDto,
         orgSlug?: string
     ) {
-        const space = await this.spacesService.getSpaceOrThrow(spaceKey, orgSlug);
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
         this.assertEditor(space, userId);
 
         const existing = await this.getPageOrThrow(pageId, space.id);
@@ -108,8 +130,16 @@ export class PagesService {
         });
     }
 
-    async remove(spaceKey: string, pageId: string, userId: string, orgSlug?: string) {
-        const space = await this.spacesService.getSpaceOrThrow(spaceKey, orgSlug);
+    async remove(
+        spaceKey: string,
+        pageId: string,
+        userId: string,
+        orgSlug?: string
+    ) {
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
         this.assertEditor(space, userId);
 
         await this.getPageOrThrow(pageId, space.id);
@@ -123,7 +153,10 @@ export class PagesService {
         dto: MovePageDto,
         orgSlug?: string
     ) {
-        const space = await this.spacesService.getSpaceOrThrow(spaceKey, orgSlug);
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
         this.assertEditor(space, userId);
 
         await this.getPageOrThrow(pageId, space.id);

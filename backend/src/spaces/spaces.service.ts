@@ -99,7 +99,12 @@ export class SpacesService {
         return space;
     }
 
-    async update(key: string, userId: string, dto: UpdateSpaceDto, orgSlug?: string) {
+    async update(
+        key: string,
+        userId: string,
+        dto: UpdateSpaceDto,
+        orgSlug?: string
+    ) {
         const space = await this.getSpaceOrThrow(key, orgSlug);
         this.assertAdminOrOwner(space, userId);
 

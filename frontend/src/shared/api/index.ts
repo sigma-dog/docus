@@ -3,3 +3,4 @@ export { api } from './api';
 export * from './spaces';
 export * from './organizations';
 export * from './pages';
+export * from './userSettings';

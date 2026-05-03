@@ -2,10 +2,12 @@ import type { FC } from 'react';
 import { Button, HStack, Spacer } from '@chakra-ui/react';
 import type { useEditor } from '@tiptap/react';
 
+import type { EditorWidth } from 'shared/types';
 import { RichTextEditor, RichTextEditorControl } from 'shared/ui';
 
 type EditorProps = {
     editor: ReturnType<typeof useEditor> | null;
+    editorWidth: EditorWidth;
     isEditing: boolean;
     isSaving: boolean;
     handleSave: () => void;
@@ -14,6 +16,7 @@ type EditorProps = {
 
 export const Editor: FC<EditorProps> = ({
     editor,
+    editorWidth,
     isEditing,
     isSaving,
     handleSave,
@@ -22,9 +25,10 @@ export const Editor: FC<EditorProps> = ({
     return (
         <RichTextEditor.Root
             editor={editor}
-            bg="white"
+            // bg="white"
             rounded="lg"
-            shadow="sm"
+            w="full"
+            maxW={editorWidth === 'FULL_WIDTH' ? 'none' : '960px'}
             css={{
                 // '--content-min-height': '400px',
                 '--content-padding-x': 'spacing.6',

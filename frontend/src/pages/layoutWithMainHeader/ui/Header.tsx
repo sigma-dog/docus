@@ -1,6 +1,8 @@
 import { LuBell, LuSettings } from 'react-icons/lu';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
-import { Avatar, HStack, Icon, Tabs } from '@chakra-ui/react';
+import { Avatar, HStack, Icon, IconButton, Tabs } from '@chakra-ui/react';
+
+import { UserSettingsMenu } from 'widgets/userSettingsMenu';
 
 import { SearchBox } from './SearchBox';
 
@@ -61,9 +63,18 @@ export const Header = () => {
                 <Icon color="fg.muted" cursor="pointer" boxSize={5}>
                     <LuBell />
                 </Icon>
-                <Icon color="fg.muted" cursor="pointer" boxSize={5}>
-                    <LuSettings />
-                </Icon>
+                <UserSettingsMenu
+                    trigger={
+                        <IconButton
+                            aria-label="Открыть меню пользователя"
+                            variant="ghost"
+                            size="sm"
+                            color="fg.muted"
+                        >
+                            <LuSettings />
+                        </IconButton>
+                    }
+                />
                 <Avatar.Root size="xs" shape="full">
                     <Avatar.Fallback name="Дима Авдеев" />
                 </Avatar.Root>

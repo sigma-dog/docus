@@ -11,4 +11,5 @@ export const tagTypes = {
     Spaces: 'Spaces',
     Organizations: 'Organizations',
     Pages: 'Pages',
+    UserSettings: 'UserSettings',
 } as const;
