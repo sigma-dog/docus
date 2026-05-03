@@ -1,1 +1,1 @@
-export { PageView as default } from './ui/PageView';
+export { PageView as default } from './ui/pageView/PageView';

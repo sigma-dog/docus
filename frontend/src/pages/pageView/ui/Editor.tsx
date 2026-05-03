@@ -26,7 +26,7 @@ export const Editor: FC<EditorProps> = ({
             rounded="lg"
             shadow="sm"
             css={{
-                '--content-min-height': '400px',
+                // '--content-min-height': '400px',
                 '--content-padding-x': 'spacing.6',
                 '--content-padding-y': 'spacing.6',
             }}

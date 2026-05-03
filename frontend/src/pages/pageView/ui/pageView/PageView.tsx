@@ -22,10 +22,12 @@ import { all, createLowlight } from 'lowlight';
 
 import { useGetPageQuery, useUpdatePageMutation } from 'shared/api';
 
-import { Header } from './header/Header';
-import { HistoryPanel } from './history/HistoryPanel';
-import { Breadcrumbs } from './Breadcrumbs';
-import { Editor } from './Editor';
+import { isPageContentEmpty } from './utils';
+import { Breadcrumbs } from '../Breadcrumbs';
+import { Editor } from '../Editor';
+import { EmptyPageState } from '../EmptyPageState';
+import { Header } from '../header/Header';
+import { HistoryPanel } from '../history/HistoryPanel';
 
 const lowlight = createLowlight(all);
 
@@ -45,6 +47,7 @@ export const PageView = () => {
     );
 
     const [updatePage, { isLoading: isSaving }] = useUpdatePageMutation();
+    const isEmptyPage = isPageContentEmpty(page?.content ?? null);
 
     const editor = useEditor({
         extensions: [
@@ -150,13 +153,19 @@ export const PageView = () => {
                             setIsShowingHistory={setIsShowingHistory}
                         />
 
-                        <Editor
-                            editor={editor}
-                            isEditing={isEditing}
-                            isSaving={isSaving}
-                            handleSave={handleSave}
-                            handleCancel={handleCancel}
-                        />
+                        {isEmptyPage && !isEditing ? (
+                            <EmptyPageState
+                                onStartEditing={() => setIsEditing(true)}
+                            />
+                        ) : (
+                            <Editor
+                                editor={editor}
+                                isEditing={isEditing}
+                                isSaving={isSaving}
+                                handleSave={handleSave}
+                                handleCancel={handleCancel}
+                            />
+                        )}
                     </Stack>
                 </Stack>
             </GridItem>
