@@ -51,6 +51,7 @@ export const Editor: FC<EditorProps> = ({
                         <RichTextEditorControl.BulletList />
                         <RichTextEditorControl.OrderedList />
                         <RichTextEditorControl.Blockquote />
+                        <RichTextEditorControl.InsertImageControl />
                         <RichTextEditorControl.CodeBlock />
                         <RichTextEditorControl.CodeBlockLanguage />
                     </RichTextEditor.ControlGroup>

@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Highlight from '@tiptap/extension-highlight';
+import Image from '@tiptap/extension-image';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import TextAlign from '@tiptap/extension-text-align';
@@ -55,6 +56,7 @@ export const PageView = () => {
             TextAlign.configure({ types: ['paragraph', 'heading'] }),
             TextStyleKit,
             Subscript,
+            Image,
             Superscript,
             Highlight.configure({ multicolor: true }),
         ],

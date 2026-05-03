@@ -46,6 +46,7 @@ import { Tooltip } from 'shared/ui/chakra/tooltip';
 
 import { useRichTextEditorContext } from './rich-text-editor-context';
 
+export { InsertImageControl } from './controls/InsertImageControl';
 export interface BaseControlConfig {
     label: string;
     icon?: React.ElementType;
