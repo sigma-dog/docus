@@ -42,7 +42,7 @@ export const TitleRename: FC<TitleRenameProps> = ({ title, onRename }) => {
 
     if (isRenaming) {
         return (
-            <HStack gap={1} flex="1" minW={0}>
+            <HStack gap={1} flex="1" minW={0} overflow="hidden">
                 <Input
                     ref={inputRef}
                     value={value}
@@ -61,6 +61,7 @@ export const TitleRename: FC<TitleRenameProps> = ({ title, onRename }) => {
                     colorPalette="green"
                     aria-label="Подтвердить"
                     onClick={commit}
+                    flexShrink={0}
                 >
                     <LuCheck />
                 </IconButton>
@@ -69,6 +70,7 @@ export const TitleRename: FC<TitleRenameProps> = ({ title, onRename }) => {
                     variant="ghost"
                     aria-label="Отмена"
                     onClick={cancel}
+                    flexShrink={0}
                 >
                     <LuX />
                 </IconButton>
@@ -77,8 +79,15 @@ export const TitleRename: FC<TitleRenameProps> = ({ title, onRename }) => {
     }
 
     return (
-        <HStack gap={1} flex="1" minW={0}>
-            <Text fontSize="2xl" fontWeight="bold" truncate>
+        <HStack gap={1} minW={0} overflow="hidden">
+            <Text
+                fontSize="2xl"
+                fontWeight="bold"
+                truncate
+                flex="1"
+                minW={0}
+                title={title}
+            >
                 {title}
             </Text>
             <IconButton
@@ -87,6 +96,7 @@ export const TitleRename: FC<TitleRenameProps> = ({ title, onRename }) => {
                 aria-label="Переименовать"
                 onClick={startRename}
                 color="fg.muted"
+                flexShrink={0}
             >
                 <LuPencil />
             </IconButton>

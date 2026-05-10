@@ -1,9 +1,11 @@
 import type { FC } from 'react';
-import { Button, HStack, Spacer } from '@chakra-ui/react';
+import { Button, HStack } from '@chakra-ui/react';
 import type { useEditor } from '@tiptap/react';
 
 import type { EditorWidth } from 'shared/types';
 import { RichTextEditor, RichTextEditorControl } from 'shared/ui';
+
+import { CompactMoreControls } from './CompactMoreControls';
 
 type EditorProps = {
     editor: ReturnType<typeof useEditor> | null;
@@ -22,13 +24,14 @@ export const Editor: FC<EditorProps> = ({
     handleSave,
     handleCancel,
 }) => {
+    const isCompact = editorWidth === 'COMPACT';
+
     return (
         <RichTextEditor.Root
             editor={editor}
-            // bg="white"
+            bg="bg.panel"
             rounded="lg"
-            w="full"
-            maxW={editorWidth === 'FULL_WIDTH' ? 'none' : '960px'}
+            w={isCompact ? '960px' : 'full'}
             css={{
                 // '--content-min-height': '400px',
                 '--content-padding-x': 'spacing.6',
@@ -38,7 +41,7 @@ export const Editor: FC<EditorProps> = ({
             {isEditing && (
                 <RichTextEditor.Toolbar
                     variant="sticky"
-                    stickyOffset="-40px"
+                    stickyOffset="-33px"
                     py={2}
                 >
                     <RichTextEditor.ControlGroup>
@@ -55,25 +58,33 @@ export const Editor: FC<EditorProps> = ({
                         <RichTextEditorControl.BulletList />
                         <RichTextEditorControl.OrderedList />
                         <RichTextEditorControl.Blockquote />
-                        <RichTextEditorControl.InsertImageControl />
                         <RichTextEditorControl.CodeBlock />
-                        <RichTextEditorControl.CodeBlockLanguage />
+                        {!isCompact && (
+                            <>
+                                <RichTextEditorControl.InsertImageControl />
+                                <RichTextEditorControl.CodeBlockLanguage />
+                            </>
+                        )}
                     </RichTextEditor.ControlGroup>
-                    <RichTextEditor.ControlGroup>
-                        <RichTextEditorControl.AlignLeft />
-                        <RichTextEditorControl.AlignCenter />
-                        <RichTextEditorControl.AlignRight />
-                    </RichTextEditor.ControlGroup>
-                    <RichTextEditor.ControlGroup>
-                        <RichTextEditorControl.Link />
-                        <RichTextEditorControl.Unlink />
-                    </RichTextEditor.ControlGroup>
+                    {!isCompact && (
+                        <RichTextEditor.ControlGroup>
+                            <RichTextEditorControl.AlignLeft />
+                            <RichTextEditorControl.AlignCenter />
+                            <RichTextEditorControl.AlignRight />
+                        </RichTextEditor.ControlGroup>
+                    )}
+                    {!isCompact && (
+                        <RichTextEditor.ControlGroup>
+                            <RichTextEditorControl.Link />
+                            <RichTextEditorControl.Unlink />
+                        </RichTextEditor.ControlGroup>
+                    )}
                     <RichTextEditor.ControlGroup>
                         <RichTextEditorControl.Undo />
                         <RichTextEditorControl.Redo />
+                        {isCompact && <CompactMoreControls editor={editor} />}
                     </RichTextEditor.ControlGroup>
-                    <Spacer />
-                    <HStack gap={2}>
+                    <HStack gap={2} ms="auto">
                         <Button
                             size="sm"
                             colorPalette="blue"

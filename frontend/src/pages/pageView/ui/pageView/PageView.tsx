@@ -133,6 +133,8 @@ export const PageView = () => {
         );
     }
 
+    const isCompact = userSettings?.editorWidth === 'COMPACT';
+
     return (
         <Grid
             flex="1"
@@ -149,8 +151,15 @@ export const PageView = () => {
                     />
 
                     <Center w="full">
-                        <Stack gap={2} alignItems="center">
+                        <Stack
+                            gap={2}
+                            alignItems="center"
+                            w={isCompact ? '960px' : 'full'}
+                        >
                             <Header
+                                editorWidth={
+                                    userSettings?.editorWidth ?? 'COMPACT'
+                                }
                                 page={page}
                                 isEditing={isEditing}
                                 isShowingHistory={isShowingHistory}
@@ -161,6 +170,9 @@ export const PageView = () => {
 
                             {isEmptyPage && !isEditing ? (
                                 <EmptyPageState
+                                    editorWidth={
+                                        userSettings?.editorWidth ?? 'COMPACT'
+                                    }
                                     onStartEditing={() => setIsEditing(true)}
                                 />
                             ) : (

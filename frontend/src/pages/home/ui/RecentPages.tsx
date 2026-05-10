@@ -8,7 +8,13 @@ type RecentPagesProps = {
 
 export const RecentPages = ({ pages }: RecentPagesProps) => {
     return (
-        <Card.Root bg="white" rounded="xl" p={8} shadow="none" borderWidth={0}>
+        <Card.Root
+            bg="bg.panel"
+            rounded="xl"
+            p={8}
+            shadow="none"
+            borderWidth={0}
+        >
             <Card.Body p={0} gap={5}>
                 <Text fontSize="lg" fontWeight="medium" color="fg.muted">
                     Продолжите работу с того места, где закончили

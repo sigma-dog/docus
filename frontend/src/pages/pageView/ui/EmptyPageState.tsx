@@ -2,13 +2,26 @@ import type { FC } from 'react';
 import { LuFilePenLine } from 'react-icons/lu';
 import { Button, EmptyState, VStack } from '@chakra-ui/react';
 
+import type { EditorWidth } from 'shared/types';
+
 type EmptyPageStateProps = {
     onStartEditing: () => void;
+    editorWidth: EditorWidth;
 };
 
-export const EmptyPageState: FC<EmptyPageStateProps> = ({ onStartEditing }) => {
+export const EmptyPageState: FC<EmptyPageStateProps> = ({
+    onStartEditing,
+    editorWidth,
+}) => {
+    const isCompact = editorWidth === 'COMPACT';
+
     return (
-        <EmptyState.Root size="lg" colorPalette="blue" minH="420px">
+        <EmptyState.Root
+            w={isCompact ? '960px' : 'full'}
+            size="lg"
+            colorPalette="blue"
+            minH="420px"
+        >
             <EmptyState.Content>
                 <EmptyState.Indicator>
                     <LuFilePenLine />

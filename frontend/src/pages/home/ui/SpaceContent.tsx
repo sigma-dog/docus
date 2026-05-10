@@ -93,7 +93,7 @@ export const SpaceContent = ({
                 {pages.map((page) => (
                     <HStack
                         key={page.id}
-                        bg="white"
+                        bg="panel"
                         rounded="lg"
                         p={4}
                         justify="space-between"
