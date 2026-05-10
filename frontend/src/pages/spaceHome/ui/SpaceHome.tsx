@@ -1,24 +1,16 @@
 import { useState } from 'react';
-import {
-    LuChevronRight,
-    LuEllipsis,
-    LuFile,
-    LuFolder,
-    LuPlus,
-    LuSearch,
-} from 'react-icons/lu';
-import { useParams } from 'react-router-dom';
+import { LuFile, LuFolder, LuPlus, LuSearch } from 'react-icons/lu';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
     Box,
-    Breadcrumb,
     Button,
     Center,
-    Grid,
     HStack,
     Icon,
     Input,
     InputGroup,
-    Skeleton,
+    Menu,
+    Portal,
     Spinner,
     Stack,
     Text,
@@ -29,15 +21,44 @@ import {
     useGetPagesQuery,
     useGetSpaceQuery,
 } from 'shared/api';
+import type { PageSummary } from 'shared/types';
 import { CreatePageOrFolderDialog } from 'widgets/createPageOrFolderDialog';
+
+import { SpaceHomeBreadcrumbs } from './navigation/SpaceHomeBreadcrumbs';
+import { SpaceNavigationGrid } from './navigation/SpaceNavigationGrid';
+
+type CreateIntent = {
+    isFolder: boolean;
+};
+
+const findPagePath = (
+    pages: PageSummary[],
+    targetId: string
+): PageSummary[] | null => {
+    for (const page of pages) {
+        if (page.id === targetId) {
+            return [page];
+        }
+
+        const childPath = findPagePath(page.children, targetId);
+        if (childPath) {
+            return [page, ...childPath];
+        }
+    }
+
+    return null;
+};
 
 export const SpaceHome = () => {
     const { orgSlug, spaceKey } = useParams<{
         orgSlug: string;
         spaceKey: string;
     }>();
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    const [isCreatePageOpen, setIsCreatePageOpen] = useState(false);
+    const [createIntent, setCreateIntent] = useState<CreateIntent | null>(null);
+    const currentFolderId = searchParams.get('folderId');
 
     const { data: org, isLoading: orgLoading } = useGetOrganizationQuery(
         orgSlug!
@@ -51,6 +72,31 @@ export const SpaceHome = () => {
         { skip: !spaceKey || !orgSlug }
     );
 
+    const currentPath = currentFolderId
+        ? findPagePath(pages, currentFolderId)
+        : null;
+    const currentFolder = currentPath?.[currentPath.length - 1]?.isFolder
+        ? currentPath[currentPath.length - 1]
+        : null;
+    const folderPath = currentFolder ? (currentPath ?? []) : [];
+    const visiblePages = currentFolder ? currentFolder.children : pages;
+
+    const openFolder = (folderId: string) => {
+        setSearchParams({ folderId });
+    };
+
+    const openPage = (pageId: string) => {
+        navigate(`/${orgSlug}/${spaceKey}/pages/${pageId}`);
+    };
+
+    const resetToRoot = () => {
+        setSearchParams({});
+    };
+
+    const openCreate = (isFolder: boolean) => {
+        setCreateIntent({ isFolder });
+    };
+
     if (orgLoading || spaceLoading) {
         return (
             <Center flex="1" h="100vh">
@@ -59,41 +105,53 @@ export const SpaceHome = () => {
         );
     }
 
-    const rootPages = pages.filter((p) => !p.parentId);
-
     return (
         <Box flex="1" overflowY="auto" bg="bg.subtle" p={8}>
             <Stack gap={6}>
                 {/* Breadcrumb + actions */}
                 <HStack justify="space-between">
-                    <Breadcrumb.Root>
-                        <Breadcrumb.List>
-                            <Breadcrumb.Item>
-                                <Breadcrumb.Link href="#">
-                                    {org?.name ?? <Skeleton h="4" w="24" />}
-                                </Breadcrumb.Link>
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Separator>
-                                <LuChevronRight />
-                            </Breadcrumb.Separator>
-                            <Breadcrumb.Item>
-                                <Breadcrumb.CurrentLink>
-                                    {space?.name ?? <Skeleton h="4" w="32" />}
-                                </Breadcrumb.CurrentLink>
-                            </Breadcrumb.Item>
-                        </Breadcrumb.List>
-                    </Breadcrumb.Root>
+                    <SpaceHomeBreadcrumbs
+                        orgSlug={orgSlug!}
+                        spaceKey={spaceKey!}
+                        orgName={org?.name}
+                        spaceName={space?.name}
+                        folderPath={folderPath}
+                        onRootClick={resetToRoot}
+                    />
 
                     <HStack gap={4}>
-                        <Button
-                            variant="subtle"
-                            colorPalette="blue"
-                            size="sm"
-                            onClick={() => setIsCreatePageOpen(true)}
-                        >
-                            <LuPlus />
-                            Создать
-                        </Button>
+                        <Menu.Root>
+                            <Menu.Trigger asChild>
+                                <Button
+                                    variant="subtle"
+                                    colorPalette="blue"
+                                    size="sm"
+                                >
+                                    <LuPlus />
+                                    Создать
+                                </Button>
+                            </Menu.Trigger>
+                            <Portal>
+                                <Menu.Positioner>
+                                    <Menu.Content minW="44">
+                                        <Menu.Item
+                                            value="page"
+                                            onClick={() => openCreate(false)}
+                                        >
+                                            <LuFile />
+                                            Страница
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            value="folder"
+                                            onClick={() => openCreate(true)}
+                                        >
+                                            <LuFolder />
+                                            Директория
+                                        </Menu.Item>
+                                    </Menu.Content>
+                                </Menu.Positioner>
+                            </Portal>
+                        </Menu.Root>
                         <InputGroup
                             startElement={
                                 <Icon color="fg.subtle">
@@ -128,14 +186,18 @@ export const SpaceHome = () => {
                     <Center py={8}>
                         <Spinner size="md" />
                     </Center>
-                ) : rootPages.length === 0 ? (
+                ) : visiblePages.length === 0 ? (
                     <Center py={16}>
                         <Stack align="center" gap={3}>
-                            <Text color="fg.muted">Страниц пока нет</Text>
+                            <Text color="fg.muted">
+                                {currentFolder
+                                    ? 'В этой директории пока пусто'
+                                    : 'Страниц пока нет'}
+                            </Text>
                             <Button
                                 size="sm"
                                 colorPalette="blue"
-                                onClick={() => setIsCreatePageOpen(true)}
+                                onClick={() => openCreate(false)}
                             >
                                 <LuPlus />
                                 Создать первую страницу
@@ -143,44 +205,27 @@ export const SpaceHome = () => {
                         </Stack>
                     </Center>
                 ) : (
-                    <Grid templateColumns="repeat(4, 250px)" gap={2}>
-                        {rootPages.map((page) => {
-                            const isFolder = page.children.length > 0;
-                            return (
-                                <HStack
-                                    key={page.id}
-                                    bg="white"
-                                    rounded="lg"
-                                    p={4}
-                                    justify="space-between"
-                                    cursor="pointer"
-                                    _hover={{ shadow: 'sm' }}
-                                >
-                                    <HStack gap={2}>
-                                        <Icon boxSize={4} color="fg.muted">
-                                            {isFolder ? (
-                                                <LuFolder />
-                                            ) : (
-                                                <LuFile />
-                                            )}
-                                        </Icon>
-                                        <Text fontSize="xs">{page.title}</Text>
-                                    </HStack>
-                                    <Icon boxSize={4} color="fg.muted">
-                                        <LuEllipsis />
-                                    </Icon>
-                                </HStack>
-                            );
-                        })}
-                    </Grid>
+                    <SpaceNavigationGrid
+                        pages={visiblePages}
+                        onPageClick={(page) => {
+                            if (page.isFolder) {
+                                openFolder(page.id);
+                                return;
+                            }
+
+                            openPage(page.id);
+                        }}
+                    />
                 )}
             </Stack>
 
-            {orgSlug && spaceKey && (
+            {orgSlug && spaceKey && createIntent && (
                 <CreatePageOrFolderDialog
                     orgSlug={orgSlug}
-                    isOpen={isCreatePageOpen}
-                    onClose={() => setIsCreatePageOpen(false)}
+                    isOpen
+                    onClose={() => setCreateIntent(null)}
+                    isFolder={createIntent.isFolder}
+                    parentId={currentFolder?.id}
                     spaceKey={spaceKey}
                 />
             )}

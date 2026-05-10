@@ -59,7 +59,7 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = ({
                 {org && (
                     <Breadcrumb.Item>
                         <Breadcrumb.Link asChild>
-                            <Link to={`/${orgSlug}`}>{org.name}</Link>
+                            <Link to={`/${orgSlug}/spaces`}>{org.name}</Link>
                         </Breadcrumb.Link>
                     </Breadcrumb.Item>
                 )}
@@ -73,13 +73,17 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = ({
                         </Breadcrumb.Link>
                     </Breadcrumb.Item>
                 )}
-                {ancestorPages.map(({ id, title }) => (
+                {ancestorPages.map(({ id, title, isFolder }) => (
                     <Fragment key={id}>
                         <Breadcrumb.Separator key={`sep-${id}`} />
                         <Breadcrumb.Item key={id}>
                             <Breadcrumb.Link asChild>
                                 <Link
-                                    to={`/${orgSlug}/${spaceKey}/pages/${id}`}
+                                    to={
+                                        isFolder
+                                            ? `/${orgSlug}/${spaceKey}?folderId=${id}`
+                                            : `/${orgSlug}/${spaceKey}/pages/${id}`
+                                    }
                                 >
                                     {title}
                                 </Link>
