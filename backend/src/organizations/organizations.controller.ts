@@ -20,6 +20,7 @@ import { CreateInviteDto } from './dto/create-invite.dto';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { JoinOrganizationDto } from './dto/join-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { UpdateOrgMemberRoleDto } from './dto/update-org-member-role.dto';
 import { OrganizationsService } from './organizations.service';
 
 @UseGuards(JwtAuthGuard)
@@ -77,6 +78,21 @@ export class OrganizationsController {
             slug,
             user.id,
             targetUserId
+        );
+    }
+
+    @Patch(':slug/members/:userId')
+    updateMemberRole(
+        @Param('slug') slug: string,
+        @Param('userId') targetUserId: string,
+        @CurrentUser() user: AuthUser,
+        @Body() dto: UpdateOrgMemberRoleDto
+    ) {
+        return this.organizationsService.updateMemberRole(
+            slug,
+            user.id,
+            targetUserId,
+            dto.role
         );
     }
 

@@ -7,6 +7,7 @@ export {
     useDeleteOrganizationMutation,
     useAddOrgMemberMutation,
     useRemoveOrgMemberMutation,
+    useUpdateOrgMemberRoleMutation,
     useGetOrgSpacesQuery,
     useCreateInviteMutation,
     useJoinOrganizationMutation,

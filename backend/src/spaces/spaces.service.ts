@@ -64,7 +64,11 @@ export class SpacesService {
         return this.prisma.space.findMany({
             where: {
                 ...orgFilter,
-                OR: [{ ownerId: userId }, { members: { some: { userId } } }],
+                OR: [
+                    { ownerId: userId },
+                    { organization: { ownerId: userId } },
+                    { organization: { members: { some: { userId } } } },
+                ],
             },
             include: {
                 _count: { select: { pages: true, members: true } },
@@ -74,11 +78,12 @@ export class SpacesService {
     }
 
     async findOne(key: string, userId: string, organizationSlug: string) {
-        const space = await this.prisma.space.findFirst({
+        const space = await this.getSpaceOrThrow(key, organizationSlug);
+        this.assertViewer(space, userId);
+
+        const fullSpace = await this.prisma.space.findFirst({
             where: {
-                key,
-                organization: { slug: organizationSlug },
-                OR: [{ ownerId: userId }, { members: { some: { userId } } }],
+                id: space.id,
             },
             include: {
                 members: {
@@ -95,8 +100,8 @@ export class SpacesService {
                 _count: { select: { pages: true } },
             },
         });
-        if (!space) throw new NotFoundException(`Space "${key}" not found`);
-        return space;
+        if (!fullSpace) throw new NotFoundException(`Space "${key}" not found`);
+        return fullSpace;
     }
 
     async update(
@@ -172,20 +177,65 @@ export class SpacesService {
                 key,
                 ...(orgSlug ? { organization: { slug: orgSlug } } : {}),
             },
-            include: { members: true },
+            include: {
+                members: true,
+                organization: {
+                    select: {
+                        ownerId: true,
+                        members: {
+                            select: { userId: true, role: true },
+                        },
+                    },
+                },
+            },
         });
         if (!space) throw new NotFoundException(`Space "${key}" not found`);
         return space;
     }
 
     private assertAdminOrOwner(
-        space: { ownerId: string; members: { userId: string; role: string }[] },
+        space: {
+            ownerId: string;
+            members: { userId: string; role: string }[];
+            organization: {
+                ownerId: string;
+                members: { userId: string; role: string }[];
+            };
+        },
         userId: string
     ) {
+        if (space.organization.ownerId === userId) return;
+        const orgMember = space.organization.members.find(
+            (member) => member.userId === userId
+        );
+        if (orgMember?.role === 'ADMIN') return;
+
         if (space.ownerId === userId) return;
         const member = space.members.find((m) => m.userId === userId);
         if (!member || member.role !== 'ADMIN') {
             throw new ForbiddenException('Insufficient permissions');
+        }
+    }
+
+    private assertViewer(
+        space: {
+            ownerId: string;
+            members: { userId: string }[];
+            organization: {
+                ownerId: string;
+                members: { userId: string }[];
+            };
+        },
+        userId: string
+    ) {
+        const access =
+            space.ownerId === userId ||
+            space.organization.ownerId === userId ||
+            space.members.some((member) => member.userId === userId) ||
+            space.organization.members.some((member) => member.userId === userId);
+
+        if (!access) {
+            throw new ForbiddenException('Access denied');
         }
     }
 }

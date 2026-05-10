@@ -1,7 +1,7 @@
 import { type FC, Fragment } from 'react';
 import { LuChevronRight } from 'react-icons/lu';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Skeleton } from '@chakra-ui/react';
+import { Breadcrumb, Skeleton, Text } from '@chakra-ui/react';
 
 import type { PageSummary } from 'shared/types';
 
@@ -22,13 +22,21 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
     folderPath,
     onRootClick,
 }) => {
+    const crumbMaxWidth = '180px';
+
     return (
         <Breadcrumb.Root>
             <Breadcrumb.List>
                 <Breadcrumb.Item>
                     <Breadcrumb.Link asChild>
                         <Link to={`/${orgSlug}/spaces`}>
-                            {orgName ?? <Skeleton h="4" w="24" />}
+                            {orgName ? (
+                                <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                    {orgName}
+                                </Text>
+                            ) : (
+                                <Skeleton h="4" w="24" />
+                            )}
                         </Link>
                     </Breadcrumb.Link>
                 </Breadcrumb.Item>
@@ -41,7 +49,13 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
                             to={`/${orgSlug}/${spaceKey}`}
                             onClick={onRootClick}
                         >
-                            {spaceName ?? <Skeleton h="4" w="32" />}
+                            {spaceName ? (
+                                <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                    {spaceName}
+                                </Text>
+                            ) : (
+                                <Skeleton h="4" w="32" />
+                            )}
                         </Link>
                     </Breadcrumb.Link>
                 </Breadcrumb.Item>
@@ -56,14 +70,18 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
                             <Breadcrumb.Item>
                                 {isLast ? (
                                     <Breadcrumb.CurrentLink>
-                                        {folder.title}
+                                        <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                            {folder.title}
+                                        </Text>
                                     </Breadcrumb.CurrentLink>
                                 ) : (
                                     <Breadcrumb.Link asChild>
                                         <Link
                                             to={`/${orgSlug}/${spaceKey}?folderId=${folder.id}`}
                                         >
-                                            {folder.title}
+                                            <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                                {folder.title}
+                                            </Text>
                                         </Link>
                                     </Breadcrumb.Link>
                                 )}

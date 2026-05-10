@@ -124,7 +124,9 @@ export class OrganizationsService {
                 role: dto.role,
             },
             include: {
-                user: { select: { id: true, username: true, avatarUrl: true } },
+                user: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
             },
         });
     }
@@ -152,7 +154,51 @@ export class OrganizationsService {
         });
         if (!member) throw new NotFoundException('Member not found');
 
-        await this.prisma.orgMember.delete({ where: { id: member.id } });
+        await this.prisma.$transaction([
+            this.prisma.orgMember.delete({ where: { id: member.id } }),
+            this.prisma.spaceMember.deleteMany({
+                where: {
+                    userId: targetUserId,
+                    space: { organizationId: org.id },
+                },
+            }),
+        ]);
+    }
+
+    async updateMemberRole(
+        slug: string,
+        requesterId: string,
+        targetUserId: string,
+        role: AddOrgMemberDto['role']
+    ) {
+        const org = await this.getOrgOrThrow(slug);
+        this.assertAdminOrOwner(org, requesterId);
+
+        if (org.ownerId === targetUserId) {
+            throw new ForbiddenException(
+                'Cannot change the organization owner role'
+            );
+        }
+
+        const member = await this.prisma.orgMember.findUnique({
+            where: {
+                organizationId_userId: {
+                    organizationId: org.id,
+                    userId: targetUserId,
+                },
+            },
+        });
+        if (!member) throw new NotFoundException('Member not found');
+
+        return this.prisma.orgMember.update({
+            where: { id: member.id },
+            data: { role },
+            include: {
+                user: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
+            },
+        });
     }
 
     async findSpaces(slug: string, userId: string) {
@@ -295,7 +341,7 @@ export class OrganizationsService {
     async getOrgOrThrow(slug: string) {
         const org = await this.prisma.organization.findUnique({
             where: { slug },
-            include: { members: true },
+            include: { members: true, spaces: { select: { id: true } } },
         });
         if (!org)
             throw new NotFoundException(`Organization "${slug}" not found`);

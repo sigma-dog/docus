@@ -1,6 +1,6 @@
 import { type FC, Fragment, memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb } from '@chakra-ui/react';
+import { Breadcrumb, Text } from '@chakra-ui/react';
 
 import {
     useGetOrganizationQuery,
@@ -55,6 +55,7 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
     );
     const ancestorPages = ancestors.slice(0, -1);
     const currentPage = ancestors[ancestors.length - 1];
+    const crumbMaxWidth = '180px';
 
     return (
         <Breadcrumb.Root>
@@ -62,7 +63,11 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
                 {org && (
                     <Breadcrumb.Item>
                         <Breadcrumb.Link asChild>
-                            <Link to={`/${orgSlug}/spaces`}>{org.name}</Link>
+                            <Link to={`/${orgSlug}/spaces`}>
+                                <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                    {org.name}
+                                </Text>
+                            </Link>
                         </Breadcrumb.Link>
                     </Breadcrumb.Item>
                 )}
@@ -71,7 +76,9 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
                     <Breadcrumb.Item>
                         <Breadcrumb.Link asChild>
                             <Link to={`/${orgSlug}/${spaceKey}`}>
-                                {space.name}
+                                <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                    {space.name}
+                                </Text>
                             </Link>
                         </Breadcrumb.Link>
                     </Breadcrumb.Item>
@@ -88,7 +95,9 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
                                             : `/${orgSlug}/${spaceKey}/pages/${id}`
                                     }
                                 >
-                                    {title}
+                                    <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                        {title}
+                                    </Text>
                                 </Link>
                             </Breadcrumb.Link>
                         </Breadcrumb.Item>
@@ -99,7 +108,9 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
                         <Breadcrumb.Separator />
                         <Breadcrumb.Item>
                             <Breadcrumb.CurrentLink>
-                                {currentPage.title}
+                                <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                    {currentPage.title}
+                                </Text>
                             </Breadcrumb.CurrentLink>
                         </Breadcrumb.Item>
                     </>

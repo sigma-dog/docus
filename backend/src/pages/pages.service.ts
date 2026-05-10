@@ -194,20 +194,44 @@ export class PagesService {
     }
 
     private assertViewer(
-        space: { ownerId: string; members: { userId: string }[] },
+        space: {
+            ownerId: string;
+            members: { userId: string }[];
+            organization: {
+                ownerId: string;
+                members: { userId: string }[];
+            };
+        },
         userId: string
     ) {
         const access =
             space.ownerId === userId ||
-            space.members.some((m) => m.userId === userId);
+            space.organization.ownerId === userId ||
+            space.members.some((m) => m.userId === userId) ||
+            space.organization.members.some((m) => m.userId === userId);
         if (!access) throw new ForbiddenException('Access denied');
     }
 
     private assertEditor(
-        space: { ownerId: string; members: { userId: string; role: string }[] },
+        space: {
+            ownerId: string;
+            members: { userId: string; role: string }[];
+            organization: {
+                ownerId: string;
+                members: { userId: string; role: string }[];
+            };
+        },
         userId: string
     ) {
-        if (space.ownerId === userId) return;
+        if (space.ownerId === userId || space.organization.ownerId === userId) {
+            return;
+        }
+
+        const orgMember = space.organization.members.find(
+            (member) => member.userId === userId
+        );
+        if (orgMember?.role === 'ADMIN') return;
+
         const member = space.members.find((m) => m.userId === userId);
         if (!member || member.role === 'VIEWER')
             throw new ForbiddenException('Insufficient permissions');

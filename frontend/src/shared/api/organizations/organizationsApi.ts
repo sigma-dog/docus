@@ -26,6 +26,10 @@ type AddOrgMemberBody = {
     role: Exclude<OrgRole, 'OWNER'>;
 };
 
+type UpdateOrgMemberRoleBody = {
+    role: Exclude<OrgRole, 'OWNER'>;
+};
+
 const getUrl = () => 'organizations';
 
 export const organizationsApi = api.injectEndpoints({
@@ -103,6 +107,20 @@ export const organizationsApi = api.injectEndpoints({
             }
         ),
 
+        updateOrgMemberRole: build.mutation<
+            OrgMember,
+            { slug: string; userId: string; body: UpdateOrgMemberRoleBody }
+        >({
+            query: ({ slug, userId, body }) => ({
+                url: `${getUrl()}/${slug}/members/${userId}`,
+                method: apiMethods.patch,
+                body,
+            }),
+            invalidatesTags: (_result, _error, { slug }) => [
+                { type: tagTypes.Organizations, id: slug },
+            ],
+        }),
+
         getOrgSpaces: build.query<Space[], string>({
             query: (slug) => `${getUrl()}/${slug}/spaces`,
             providesTags: (_result, _error, slug) => [
@@ -153,6 +171,7 @@ export const {
     useDeleteOrganizationMutation,
     useAddOrgMemberMutation,
     useRemoveOrgMemberMutation,
+    useUpdateOrgMemberRoleMutation,
     useGetOrgSpacesQuery,
     useCreateInviteMutation,
     useJoinOrganizationMutation,

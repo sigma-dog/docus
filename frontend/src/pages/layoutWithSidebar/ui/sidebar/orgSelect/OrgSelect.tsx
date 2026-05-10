@@ -74,6 +74,8 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
                                         fontSize="sm"
                                         fontWeight="medium"
                                         lineHeight="short"
+                                        lineClamp={1}
+                                        maxW="220px"
                                     >
                                         {selectedOrg.name}
                                     </Text>
@@ -82,6 +84,8 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
                                             fontSize="xs"
                                             color="fg.muted"
                                             lineHeight="short"
+                                            lineClamp={1}
+                                            maxW="220px"
                                         >
                                             {selectedOrg.description}
                                         </Text>
@@ -137,7 +141,9 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
                                                 name={item.label}
                                             />
                                         </Avatar.Root>
-                                        {item.label}
+                                        <Text lineClamp={1} maxW="220px">
+                                            {item.label}
+                                        </Text>
                                     </HStack>
                                 </Select.Item>
                             );
