@@ -1,4 +1,4 @@
-import { type FC, Fragment } from 'react';
+import { type FC, Fragment, memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Breadcrumb } from '@chakra-ui/react';
 
@@ -37,11 +37,11 @@ const findAncestors = (
     return findPath(pages, targetId) ?? [];
 };
 
-export const Breadcrumbs: FC<BreadcrumbsProps> = ({
+export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
     orgSlug,
     spaceKey,
     pageId,
-}) => {
+}) {
     const { data: org } = useGetOrganizationQuery(orgSlug);
     const { data: space } = useGetSpaceQuery({
         key: spaceKey,
@@ -49,7 +49,10 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = ({
     });
     const { data: pages } = useGetPagesQuery({ orgSlug, spaceKey });
 
-    const ancestors = pages ? findAncestors(pages, pageId) : [];
+    const ancestors = useMemo(
+        () => (pages ? findAncestors(pages, pageId) : []),
+        [pageId, pages]
+    );
     const ancestorPages = ancestors.slice(0, -1);
     const currentPage = ancestors[ancestors.length - 1];
 
@@ -104,4 +107,4 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = ({
             </Breadcrumb.List>
         </Breadcrumb.Root>
     );
-};
+});

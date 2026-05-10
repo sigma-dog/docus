@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
     Box,
@@ -70,7 +70,6 @@ export const PageView = () => {
         ],
         content: '',
         editable: false,
-        shouldRerenderOnTransaction: true,
         immediatelyRender: false,
     });
 
@@ -86,7 +85,7 @@ export const PageView = () => {
         }
     }, [editor, isEditing]);
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!editor || !orgSlug || !spaceKey || !pageId) {
             return;
         }
@@ -97,21 +96,24 @@ export const PageView = () => {
             body: { content: editor.getHTML() },
         });
         setIsEditing(false);
-    };
+    }, [editor, orgSlug, pageId, spaceKey, updatePage]);
 
-    const handleRenameTitle = async (title: string) => {
-        if (!orgSlug || !spaceKey || !pageId) {
-            return;
-        }
-        await updatePage({ orgSlug, spaceKey, pageId, body: { title } });
-    };
+    const handleRenameTitle = useCallback(
+        async (title: string) => {
+            if (!orgSlug || !spaceKey || !pageId) {
+                return;
+            }
+            await updatePage({ orgSlug, spaceKey, pageId, body: { title } });
+        },
+        [orgSlug, pageId, spaceKey, updatePage]
+    );
 
-    const handleCancel = () => {
+    const handleCancel = useCallback(() => {
         if (editor && page) {
             editor.commands.setContent(page.content ?? '');
         }
         setIsEditing(false);
-    };
+    }, [editor, page]);
 
     if (!orgSlug || !spaceKey || !pageId) {
         return null;

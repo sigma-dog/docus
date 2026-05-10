@@ -40,7 +40,7 @@ import {
     Select,
     VStack,
 } from '@chakra-ui/react';
-import { Editor } from '@tiptap/react';
+import { Editor, useEditorState } from '@tiptap/react';
 
 import { Tooltip } from 'shared/ui/chakra/tooltip';
 
@@ -95,25 +95,48 @@ export function createBooleanControl(config: BooleanControlConfig) {
     const BooleanControl = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         function BooleanControl(props, ref) {
             const { editor } = useRichTextEditorContext();
-            if (!editor) {
+            const state = useEditorState({
+                editor,
+                selector: ({ editor: currentEditor }) => {
+                    if (!currentEditor) {
+                        return {
+                            disabled: true,
+                            dynamicProps: {},
+                            variant: undefined,
+                        };
+                    }
+
+                    const dynamicProps = getProps
+                        ? getProps(currentEditor)
+                        : {};
+
+                    return {
+                        disabled: isDisabled
+                            ? isDisabled(currentEditor)
+                            : false,
+                        dynamicProps,
+                        variant:
+                            getVariant && !getProps
+                                ? getVariant(currentEditor)
+                                : (dynamicProps.variant as IconButtonProps['variant']),
+                    };
+                },
+            });
+
+            if (!editor || !state) {
                 return null;
             }
-            const disabled = isDisabled ? isDisabled(editor) : false;
-            const dynamicProps = getProps ? getProps(editor) : {};
-            const variant =
-                getVariant && !getProps
-                    ? getVariant(editor)
-                    : (dynamicProps.variant as IconButtonProps['variant']);
 
             return (
                 <ButtonControl
                     ref={ref}
                     label={label}
                     icon={<Icon />}
-                    variant={variant}
+                    variant={state.variant}
                     onClick={() => command(editor)}
-                    disabled={disabled}
+                    disabled={state.disabled}
                     {...props}
+                    {...state.dynamicProps}
                 />
             );
         }
@@ -157,22 +180,41 @@ export function createSelectControl(config: SelectControlConfig) {
     >(function SelectControl(props, ref) {
         const { editor } = useRichTextEditorContext();
         const controlId = React.useId();
+        const collection = React.useMemo(
+            () => createListCollection({ items: options }),
+            [options]
+        );
 
-        if (!editor) {
+        const state = useEditorState({
+            editor,
+            selector: ({ editor: currentEditor }) => {
+                if (!currentEditor) {
+                    return {
+                        currentValue: '',
+                        disabled: true,
+                        dynamicProps: {},
+                    };
+                }
+
+                return {
+                    currentValue: getValue(currentEditor),
+                    disabled: isDisabled ? isDisabled(currentEditor) : false,
+                    dynamicProps: getProps ? getProps(currentEditor) : {},
+                };
+            },
+        });
+
+        if (!editor || !state) {
             return null;
         }
 
-        const currentValue = getValue(editor);
-        const disabled = isDisabled ? isDisabled(editor) : false;
-
-        const currentOption = options.find((o) => o.value === currentValue);
+        const currentOption = options.find(
+            (o) => o.value === state.currentValue
+        );
         const displayValue =
             renderValue && currentOption
-                ? renderValue(currentValue, currentOption)
+                ? renderValue(state.currentValue, currentOption)
                 : (currentOption?.label ?? placeholder);
-
-        const collection = createListCollection({ items: options });
-        const dynamicProps = getProps ? getProps(editor) : {};
 
         return (
             <Select.Root
@@ -181,16 +223,16 @@ export function createSelectControl(config: SelectControlConfig) {
                 size="xs"
                 variant="ghost"
                 collection={collection}
-                value={[currentValue]}
+                value={[state.currentValue]}
                 onValueChange={(details) => command(editor, details.value[0])}
-                disabled={disabled}
+                disabled={state.disabled}
                 ids={{ trigger: controlId }}
                 positioning={{ sameWidth: false }}
                 css={{
                     '--select-trigger-height': 'sizes.6',
                     '--select-trigger-padding-x': 'spacing.2',
                 }}
-                {...dynamicProps}
+                {...state.dynamicProps}
             >
                 <Tooltip content={label} ids={{ trigger: controlId }}>
                     <Select.Trigger ref={ref}>
@@ -256,13 +298,30 @@ export function createSwatchControl(config: SwatchControlConfig) {
             const { editor } = useRichTextEditorContext();
             const [open, setOpen] = React.useState(false);
             const triggerId = React.useId();
+            const state = useEditorState({
+                editor,
+                selector: ({ editor: currentEditor }) => {
+                    if (!currentEditor) {
+                        return {
+                            currentValue: '',
+                            disabled: true,
+                            dynamicProps: {},
+                        };
+                    }
 
-            if (!editor) {
+                    return {
+                        currentValue: getValue(currentEditor),
+                        disabled: isDisabled
+                            ? isDisabled(currentEditor)
+                            : false,
+                        dynamicProps: getProps ? getProps(currentEditor) : {},
+                    };
+                },
+            });
+
+            if (!editor || !state) {
                 return null;
             }
-            const currentValue = getValue(editor);
-            const disabled = isDisabled ? isDisabled(editor) : false;
-            const dynamicProps = getProps ? getProps(editor) : {};
 
             return (
                 <Popover.Root
@@ -277,14 +336,14 @@ export function createSwatchControl(config: SwatchControlConfig) {
                                 ref={ref}
                                 size="2xs"
                                 aria-label={label}
-                                disabled={disabled}
-                                {...dynamicProps}
+                                disabled={state.disabled}
+                                {...state.dynamicProps}
                                 {...props}
                             >
                                 <VStack gap="1px">
                                     {Icon && <Icon />}
                                     <ColorSwatch
-                                        value={currentValue}
+                                        value={state.currentValue}
                                         h="4px"
                                         w="100%"
                                     />

@@ -48,10 +48,18 @@ export const CodeBlockNodeView: React.FC<NodeViewProps> = ({
 }) => {
     const language = (node.attrs.language as string) || '';
     const [isEditable, setIsEditable] = React.useState(editor.isEditable);
+    const isEditableRef = React.useRef(editor.isEditable);
+
+    React.useEffect(() => {
+        isEditableRef.current = isEditable;
+    }, [isEditable]);
 
     React.useEffect(() => {
         const handler = () => {
             const editable = editor.isEditable;
+            if (editable === isEditableRef.current) {
+                return;
+            }
             setTimeout(() => setIsEditable(editable), 0);
         };
         editor.on('transaction', handler);
