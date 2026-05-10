@@ -3,7 +3,7 @@ import { LuBuilding2, LuEllipsis } from 'react-icons/lu';
 import {
     CloseButton,
     DataList,
-    Dialog,
+    Drawer,
     IconButton,
     Menu,
     Portal,
@@ -39,7 +39,7 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
     organization,
     triggerAriaLabel = 'Действия с организацией',
 }) => {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isEditingName, setIsEditingName] = useState(false);
     const [isEditingDescription, setIsEditingDescription] = useState(false);
     const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -55,7 +55,7 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
         isFetching,
         isError,
     } = useGetOrganizationQuery(organization.slug, {
-        skip: !isDialogOpen,
+        skip: !isDrawerOpen,
         refetchOnMountOrArgChange: true,
     });
     const [updateOrganization, { isLoading: isSaving }] =
@@ -100,8 +100,8 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
     }, [currentMember?.role, currentUser, organizationDetails]);
     const canEditOrganization = canManageMembers;
 
-    const handleDialogOpenChange = (open: boolean) => {
-        setIsDialogOpen(open);
+    const handleDrawerOpenChange = (open: boolean) => {
+        setIsDrawerOpen(open);
 
         if (open) {
             return;
@@ -279,7 +279,7 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                         <Menu.Content minW="180px">
                             <Menu.Item
                                 value="organization-info"
-                                onClick={() => setIsDialogOpen(true)}
+                                onClick={() => setIsDrawerOpen(true)}
                             >
                                 <LuBuilding2 />
                                 Об организации
@@ -289,29 +289,28 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                 </Portal>
             </Menu.Root>
 
-            <Dialog.Root
+            <Drawer.Root
                 lazyMount
-                open={isDialogOpen}
+                open={isDrawerOpen}
+                placement="start"
                 size={{ base: 'full', md: 'lg' }}
-                placement="center"
-                scrollBehavior="inside"
-                onOpenChange={(details) => handleDialogOpenChange(details.open)}
+                onOpenChange={(details) => handleDrawerOpenChange(details.open)}
             >
                 <Portal>
-                    <Dialog.Backdrop />
-                    <Dialog.Positioner>
-                        <Dialog.Content>
-                            <Dialog.Header>
-                                <Dialog.Title>
+                    <Drawer.Backdrop />
+                    <Drawer.Positioner>
+                        <Drawer.Content>
+                            <Drawer.Header>
+                                <Drawer.Title>
                                     <Text lineClamp={1} w="full">
                                         Организация{' '}
                                         {organizationDetails?.name ??
                                             organization.name}
                                     </Text>
-                                </Dialog.Title>
-                            </Dialog.Header>
+                                </Drawer.Title>
+                            </Drawer.Header>
 
-                            <Dialog.Body pb={6}>
+                            <Drawer.Body pb={6}>
                                 {isFetching && !organizationDetails ? (
                                     <Stack py={10} align="center">
                                         <Spinner size="sm" />
@@ -416,15 +415,15 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                                         />
                                     </Stack>
                                 )}
-                            </Dialog.Body>
+                            </Drawer.Body>
 
-                            <Dialog.CloseTrigger asChild>
+                            <Drawer.CloseTrigger asChild>
                                 <CloseButton size="sm" />
-                            </Dialog.CloseTrigger>
-                        </Dialog.Content>
-                    </Dialog.Positioner>
+                            </Drawer.CloseTrigger>
+                        </Drawer.Content>
+                    </Drawer.Positioner>
                 </Portal>
-            </Dialog.Root>
+            </Drawer.Root>
 
             <InviteMemberDialog
                 isOpen={isInviteOpen}

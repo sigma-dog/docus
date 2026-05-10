@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { type AuthUser } from '../common/types/auth.types';
 import { AddMemberDto } from './dto/add-member.dto';
 import { CreateSpaceDto } from './dto/create-space.dto';
+import { UpdateSpaceMemberDto } from './dto/update-space-member.dto';
 import { UpdateSpaceDto } from './dto/update-space.dto';
 import { SpacesService } from './spaces.service';
 
@@ -84,5 +85,21 @@ export class SpacesController {
         @CurrentUser() user: AuthUser
     ) {
         return this.spacesService.removeMember(key, user.id, targetUserId);
+    }
+
+    @Patch(':key/members/:userId')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    updateMember(
+        @Param('key') key: string,
+        @Param('userId') targetUserId: string,
+        @CurrentUser() user: AuthUser,
+        @Body() dto: UpdateSpaceMemberDto
+    ) {
+        return this.spacesService.updateMember(
+            key,
+            user.id,
+            targetUserId,
+            dto
+        );
     }
 }

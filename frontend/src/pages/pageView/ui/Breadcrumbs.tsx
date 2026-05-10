@@ -122,15 +122,12 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
                     <>
                         <Breadcrumb.Separator />
                         <Breadcrumb.Item>
-                            <Breadcrumb.CurrentLink>
-                                <Text
-                                    as="span"
-                                    display="inline-block"
-                                    maxW={crumbMaxWidth}
-                                    truncate
-                                >
-                                    {currentPage.title}
-                                </Text>
+                            <Breadcrumb.CurrentLink
+                                display="inline-block"
+                                maxW={crumbMaxWidth}
+                                truncate
+                            >
+                                {currentPage.title}
                             </Breadcrumb.CurrentLink>
                         </Breadcrumb.Item>
                     </>

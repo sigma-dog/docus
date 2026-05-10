@@ -20,6 +20,11 @@ type SpaceActionArgs = {
     organizationSlug: string;
 };
 
+type UpdateSpaceMemberBody = {
+    role?: 'ADMIN' | 'EDITOR' | 'VIEWER';
+    inherit?: boolean;
+};
+
 const getUrl = () => 'spaces';
 
 export const spacesApi = api.injectEndpoints({
@@ -73,6 +78,38 @@ export const spacesApi = api.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.Spaces],
         }),
+
+        updateSpaceMember: build.mutation<
+            void,
+            SpaceActionArgs & {
+                userId: string;
+                body: UpdateSpaceMemberBody;
+            }
+        >({
+            query: ({ key, userId, body }) => ({
+                url: `${getUrl()}/${key}/members/${userId}`,
+                method: apiMethods.patch,
+                body,
+            }),
+            invalidatesTags: (_result, _error, { key }) => [
+                { type: tagTypes.Spaces, id: key },
+                tagTypes.Spaces,
+            ],
+        }),
+
+        removeSpaceMember: build.mutation<
+            void,
+            SpaceActionArgs & { userId: string }
+        >({
+            query: ({ key, userId }) => ({
+                url: `${getUrl()}/${key}/members/${userId}`,
+                method: apiMethods.delete,
+            }),
+            invalidatesTags: (_result, _error, { key }) => [
+                { type: tagTypes.Spaces, id: key },
+                tagTypes.Spaces,
+            ],
+        }),
     }),
     overrideExisting: false,
 });
@@ -83,4 +120,6 @@ export const {
     useCreateSpaceMutation,
     useUpdateSpaceMutation,
     useDeleteSpaceMutation,
+    useUpdateSpaceMemberMutation,
+    useRemoveSpaceMemberMutation,
 } = spacesApi;

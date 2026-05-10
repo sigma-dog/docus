@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useDeletePageMutation, useUpdatePageMutation } from 'shared/api';
+import { useCurrentSpacePermissions } from 'shared/lib';
 import { EmojiPicker } from 'shared/ui';
 import { ConfirmDialog } from 'shared/ui/confirmDialog/ConfirmDialog';
 
@@ -41,9 +42,14 @@ export const NodeContextMenu: FC<Props> = ({
     const [emojiOpen, setEmojiOpen] = useState(false);
     const [title, setTitle] = useState('');
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const { canEdit } = useCurrentSpacePermissions();
 
     const [updatePage, { isLoading: isUpdating }] = useUpdatePageMutation();
     const [deletePage, { isLoading: isDeleting }] = useDeletePageMutation();
+
+    if (!canEdit) {
+        return null;
+    }
 
     const handleRenameOpen = () => {
         setTitle(nodeTitle);

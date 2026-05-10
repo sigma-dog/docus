@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 
 import { useCreatePageMutation } from 'shared/api';
+import { useCurrentSpacePermissions } from 'shared/lib';
 
 type CreatePageOrFolderDialogProps = {
     isOpen: boolean;
@@ -34,6 +35,7 @@ export const CreatePageOrFolderDialog: FC<CreatePageOrFolderDialogProps> = ({
 }) => {
     const [title, setTitle] = useState('');
     const [createPage, { isLoading }] = useCreatePageMutation();
+    const { canEdit } = useCurrentSpacePermissions();
 
     const handleClose = () => {
         setTitle('');
@@ -42,7 +44,7 @@ export const CreatePageOrFolderDialog: FC<CreatePageOrFolderDialogProps> = ({
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!title.trim()) {
+        if (!title.trim() || !canEdit) {
             return;
         }
 
@@ -58,6 +60,10 @@ export const CreatePageOrFolderDialog: FC<CreatePageOrFolderDialogProps> = ({
     const placeholder = isFolder
         ? 'Введите название директории'
         : 'Введите название страницы';
+
+    if (!canEdit) {
+        return null;
+    }
 
     return (
         <Dialog.Root

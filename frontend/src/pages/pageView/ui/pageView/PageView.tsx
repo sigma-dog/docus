@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
     Box,
@@ -25,6 +25,7 @@ import {
     useGetUserSettingsQuery,
     useUpdatePageMutation,
 } from 'shared/api';
+import { useCurrentSpacePermissions } from 'shared/lib';
 
 import { isPageContentEmpty } from './utils';
 import { Breadcrumbs } from '../Breadcrumbs';
@@ -45,6 +46,7 @@ export const PageView = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [isShowingHistory, setIsShowingHistory] = useState(false);
     const { data: userSettings } = useGetUserSettingsQuery();
+    const { canEdit } = useCurrentSpacePermissions();
 
     const { data: page, isLoading } = useGetPageQuery(
         { orgSlug: orgSlug!, spaceKey: spaceKey!, pageId: pageId! },
@@ -53,6 +55,7 @@ export const PageView = () => {
 
     const [updatePage, { isLoading: isSaving }] = useUpdatePageMutation();
     const isEmptyPage = isPageContentEmpty(page?.content ?? null);
+    const effectiveIsEditing = isEditing && canEdit;
 
     const editor = useEditor({
         extensions: [
@@ -81,12 +84,15 @@ export const PageView = () => {
 
     useEffect(() => {
         if (editor) {
-            editor.setEditable(isEditing);
+            editor.setEditable(effectiveIsEditing);
         }
-    }, [editor, isEditing]);
+    }, [editor, effectiveIsEditing]);
 
-    const handleSave = useCallback(async () => {
+    const handleSave = async () => {
         if (!editor || !orgSlug || !spaceKey || !pageId) {
+            return;
+        }
+        if (!canEdit) {
             return;
         }
         await updatePage({
@@ -96,24 +102,24 @@ export const PageView = () => {
             body: { content: editor.getHTML() },
         });
         setIsEditing(false);
-    }, [editor, orgSlug, pageId, spaceKey, updatePage]);
+    };
 
-    const handleRenameTitle = useCallback(
-        async (title: string) => {
-            if (!orgSlug || !spaceKey || !pageId) {
-                return;
-            }
-            await updatePage({ orgSlug, spaceKey, pageId, body: { title } });
-        },
-        [orgSlug, pageId, spaceKey, updatePage]
-    );
+    const handleRenameTitle = async (title: string) => {
+        if (!orgSlug || !spaceKey || !pageId) {
+            return;
+        }
+        if (!canEdit) {
+            return;
+        }
+        await updatePage({ orgSlug, spaceKey, pageId, body: { title } });
+    };
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = () => {
         if (editor && page) {
             editor.commands.setContent(page.content ?? '');
         }
         setIsEditing(false);
-    }, [editor, page]);
+    };
 
     if (!orgSlug || !spaceKey || !pageId) {
         return null;
@@ -159,23 +165,29 @@ export const PageView = () => {
                             w={isCompact ? '960px' : 'full'}
                         >
                             <Header
+                                canEdit={canEdit}
                                 editorWidth={
                                     userSettings?.editorWidth ?? 'COMPACT'
                                 }
                                 page={page}
-                                isEditing={isEditing}
+                                isEditing={effectiveIsEditing}
                                 isShowingHistory={isShowingHistory}
                                 handleRenameTitle={handleRenameTitle}
                                 setIsEditing={setIsEditing}
                                 setIsShowingHistory={setIsShowingHistory}
                             />
 
-                            {isEmptyPage && !isEditing ? (
+                            {isEmptyPage && !effectiveIsEditing ? (
                                 <EmptyPageState
+                                    canEdit={canEdit}
                                     editorWidth={
                                         userSettings?.editorWidth ?? 'COMPACT'
                                     }
-                                    onStartEditing={() => setIsEditing(true)}
+                                    onStartEditing={
+                                        canEdit
+                                            ? () => setIsEditing(true)
+                                            : undefined
+                                    }
                                 />
                             ) : (
                                 <Editor
@@ -183,7 +195,7 @@ export const PageView = () => {
                                     editorWidth={
                                         userSettings?.editorWidth ?? 'COMPACT'
                                     }
-                                    isEditing={isEditing}
+                                    isEditing={effectiveIsEditing}
                                     isSaving={isSaving}
                                     handleSave={handleSave}
                                     handleCancel={handleCancel}

@@ -233,8 +233,17 @@ export class PagesService {
         if (orgMember?.role === 'ADMIN') return;
 
         const member = space.members.find((m) => m.userId === userId);
-        if (!member || member.role === 'VIEWER')
-            throw new ForbiddenException('Insufficient permissions');
+        if (member) {
+            if (member.role === 'VIEWER') {
+                throw new ForbiddenException('Insufficient permissions');
+            }
+
+            return;
+        }
+
+        if (orgMember) return;
+
+        throw new ForbiddenException('Insufficient permissions');
     }
 }
 

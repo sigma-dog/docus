@@ -79,15 +79,12 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
                             </Breadcrumb.Separator>
                             <Breadcrumb.Item>
                                 {isLast ? (
-                                    <Breadcrumb.CurrentLink>
-                                        <Text
-                                            as="span"
-                                            display="inline-block"
-                                            maxW={crumbMaxWidth}
-                                            truncate
-                                        >
-                                            {folder.title}
-                                        </Text>
+                                    <Breadcrumb.CurrentLink
+                                        display="inline-block"
+                                        maxW={crumbMaxWidth}
+                                        truncate
+                                    >
+                                        {folder.title}
                                     </Breadcrumb.CurrentLink>
                                 ) : (
                                     <Breadcrumb.Link asChild>

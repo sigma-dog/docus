@@ -21,6 +21,7 @@ import {
     useGetPagesQuery,
     useGetSpaceQuery,
 } from 'shared/api';
+import { useCurrentSpacePermissions } from 'shared/lib';
 import type { PageSummary } from 'shared/types';
 import { CreatePageOrFolderDialog } from 'widgets/createPageOrFolderDialog';
 
@@ -59,6 +60,7 @@ export const SpaceHome = () => {
 
     const [createIntent, setCreateIntent] = useState<CreateIntent | null>(null);
     const currentFolderId = searchParams.get('folderId');
+    const { canEdit } = useCurrentSpacePermissions();
 
     const { data: org, isLoading: orgLoading } = useGetOrganizationQuery(
         orgSlug!
@@ -120,38 +122,42 @@ export const SpaceHome = () => {
                     />
 
                     <HStack gap={4}>
-                        <Menu.Root>
-                            <Menu.Trigger asChild>
-                                <Button
-                                    variant="subtle"
-                                    colorPalette="blue"
-                                    size="sm"
-                                >
-                                    <LuPlus />
-                                    Создать
-                                </Button>
-                            </Menu.Trigger>
-                            <Portal>
-                                <Menu.Positioner>
-                                    <Menu.Content minW="44">
-                                        <Menu.Item
-                                            value="page"
-                                            onClick={() => openCreate(false)}
-                                        >
-                                            <LuFile />
-                                            Страница
-                                        </Menu.Item>
-                                        <Menu.Item
-                                            value="folder"
-                                            onClick={() => openCreate(true)}
-                                        >
-                                            <LuFolder />
-                                            Директория
-                                        </Menu.Item>
-                                    </Menu.Content>
-                                </Menu.Positioner>
-                            </Portal>
-                        </Menu.Root>
+                        {canEdit && (
+                            <Menu.Root>
+                                <Menu.Trigger asChild>
+                                    <Button
+                                        variant="subtle"
+                                        colorPalette="blue"
+                                        size="sm"
+                                    >
+                                        <LuPlus />
+                                        Создать
+                                    </Button>
+                                </Menu.Trigger>
+                                <Portal>
+                                    <Menu.Positioner>
+                                        <Menu.Content minW="44">
+                                            <Menu.Item
+                                                value="page"
+                                                onClick={() =>
+                                                    openCreate(false)
+                                                }
+                                            >
+                                                <LuFile />
+                                                Страница
+                                            </Menu.Item>
+                                            <Menu.Item
+                                                value="folder"
+                                                onClick={() => openCreate(true)}
+                                            >
+                                                <LuFolder />
+                                                Директория
+                                            </Menu.Item>
+                                        </Menu.Content>
+                                    </Menu.Positioner>
+                                </Portal>
+                            </Menu.Root>
+                        )}
                         <InputGroup
                             startElement={
                                 <Icon color="fg.subtle">
@@ -194,14 +200,16 @@ export const SpaceHome = () => {
                                     ? 'В этой директории пока пусто'
                                     : 'Страниц пока нет'}
                             </Text>
-                            <Button
-                                size="sm"
-                                colorPalette="blue"
-                                onClick={() => openCreate(false)}
-                            >
-                                <LuPlus />
-                                Создать первую страницу
-                            </Button>
+                            {canEdit && (
+                                <Button
+                                    size="sm"
+                                    colorPalette="blue"
+                                    onClick={() => openCreate(false)}
+                                >
+                                    <LuPlus />
+                                    Создать первую страницу
+                                </Button>
+                            )}
                         </Stack>
                     </Center>
                 ) : (

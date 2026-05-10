@@ -9,6 +9,7 @@ import { LastEdited } from '../lastEdited/LastEdited';
 
 type HeaderProps = {
     page: Page;
+    canEdit: boolean;
     isEditing: boolean;
     isShowingHistory: boolean;
     handleRenameTitle: (title: string) => void;
@@ -19,6 +20,7 @@ type HeaderProps = {
 
 export const Header: FC<HeaderProps> = ({
     page,
+    canEdit,
     isEditing,
     isShowingHistory,
     handleRenameTitle,
@@ -36,7 +38,11 @@ export const Header: FC<HeaderProps> = ({
             gap={4}
             width={isCompact ? '960px' : 'full'}
         >
-            <TitleRename title={page.title} onRename={handleRenameTitle} />
+            <TitleRename
+                title={page.title}
+                onRename={handleRenameTitle}
+                canEdit={canEdit}
+            />
             {!isEditing && (
                 <HStack gap={3} flexShrink={0}>
                     <LastEdited page={page} />
@@ -49,14 +55,16 @@ export const Header: FC<HeaderProps> = ({
                         <LuHistory />
                         История
                     </Button>
-                    <Button
-                        size="sm"
-                        variant="subtle"
-                        onClick={() => setIsEditing(true)}
-                    >
-                        <LuPencil />
-                        Редактировать
-                    </Button>
+                    {canEdit && (
+                        <Button
+                            size="sm"
+                            variant="subtle"
+                            onClick={() => setIsEditing(true)}
+                        >
+                            <LuPencil />
+                            Редактировать
+                        </Button>
+                    )}
                 </HStack>
             )}
         </HStack>

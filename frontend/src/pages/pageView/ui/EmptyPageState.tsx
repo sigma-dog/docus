@@ -5,11 +5,13 @@ import { Button, EmptyState, VStack } from '@chakra-ui/react';
 import type { EditorWidth } from 'shared/types';
 
 type EmptyPageStateProps = {
-    onStartEditing: () => void;
+    canEdit: boolean;
+    onStartEditing?: () => void;
     editorWidth: EditorWidth;
 };
 
 export const EmptyPageState: FC<EmptyPageStateProps> = ({
+    canEdit,
     onStartEditing,
     editorWidth,
 }) => {
@@ -33,9 +35,15 @@ export const EmptyPageState: FC<EmptyPageStateProps> = ({
                         начать наполнять страницу.
                     </EmptyState.Description>
                 </VStack>
-                <Button size="sm" colorPalette="blue" onClick={onStartEditing}>
-                    Начать редактирование
-                </Button>
+                {canEdit && onStartEditing && (
+                    <Button
+                        size="sm"
+                        colorPalette="blue"
+                        onClick={onStartEditing}
+                    >
+                        Начать редактирование
+                    </Button>
+                )}
             </EmptyState.Content>
         </EmptyState.Root>
     );

@@ -5,9 +5,14 @@ import { HStack, IconButton, Input, Text } from '@chakra-ui/react';
 type TitleRenameProps = {
     title: string;
     onRename: (title: string) => void;
+    canEdit: boolean;
 };
 
-export const TitleRename: FC<TitleRenameProps> = ({ title, onRename }) => {
+export const TitleRename: FC<TitleRenameProps> = ({
+    title,
+    onRename,
+    canEdit,
+}) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [value, setValue] = useState(title);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -90,16 +95,18 @@ export const TitleRename: FC<TitleRenameProps> = ({ title, onRename }) => {
             >
                 {title}
             </Text>
-            <IconButton
-                size="xs"
-                variant="ghost"
-                aria-label="Переименовать"
-                onClick={startRename}
-                color="fg.muted"
-                flexShrink={0}
-            >
-                <LuPencil />
-            </IconButton>
+            {canEdit && (
+                <IconButton
+                    size="xs"
+                    variant="ghost"
+                    aria-label="Переименовать"
+                    onClick={startRename}
+                    color="fg.muted"
+                    flexShrink={0}
+                >
+                    <LuPencil />
+                </IconButton>
+            )}
         </HStack>
     );
 };
