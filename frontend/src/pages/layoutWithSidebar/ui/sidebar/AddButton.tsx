@@ -3,13 +3,11 @@ import { LuFile, LuFolder, LuPlus } from 'react-icons/lu';
 import { Button, Menu, Portal } from '@chakra-ui/react';
 
 type AddButtonProps = {
-    isExpanded: boolean;
     onCreatePage: () => void;
     onCreateFolder: () => void;
 };
 
 export const AddButton: FC<AddButtonProps> = ({
-    isExpanded,
     onCreatePage,
     onCreateFolder,
 }) => {
@@ -18,7 +16,7 @@ export const AddButton: FC<AddButtonProps> = ({
             <Menu.Trigger asChild>
                 <Button variant="subtle" colorPalette="blue" w="full" size="md">
                     <LuPlus />
-                    {isExpanded && 'Создать'}
+                    Создать
                 </Button>
             </Menu.Trigger>
             <Portal>

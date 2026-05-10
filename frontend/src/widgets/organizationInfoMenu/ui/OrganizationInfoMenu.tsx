@@ -56,6 +56,7 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
         isError,
     } = useGetOrganizationQuery(organization.slug, {
         skip: !isDialogOpen,
+        refetchOnMountOrArgChange: true,
     });
     const [updateOrganization, { isLoading: isSaving }] =
         useUpdateOrganizationMutation();
@@ -302,10 +303,7 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                         <Dialog.Content>
                             <Dialog.Header>
                                 <Dialog.Title>
-                                    <Text
-                                        lineClamp={1}
-                                        maxW="calc(100% - 2rem)"
-                                    >
+                                    <Text lineClamp={1} w="full">
                                         Организация{' '}
                                         {organizationDetails?.name ??
                                             organization.name}

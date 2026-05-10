@@ -28,8 +28,13 @@ export const SpaceSelect: FC<SpaceSelectProps> = ({
     onSelect,
     organizationSlug,
 }) => {
-    const { data: spaces = [], isLoading } =
-        useGetSpacesQuery(organizationSlug);
+    const {
+        currentData: spaces = [],
+        isLoading,
+        isFetching,
+    } = useGetSpacesQuery(organizationSlug, {
+        refetchOnMountOrArgChange: true,
+    });
 
     const items = spaces.map((s: Space) => ({ label: s.name, value: s.key }));
 
@@ -39,7 +44,7 @@ export const SpaceSelect: FC<SpaceSelectProps> = ({
 
     const selectedSpace = spaces.find((s: Space) => s.key === selectedKey);
 
-    if (isLoading) {
+    if (isLoading || (isFetching && !spaces.length)) {
         return <Skeleton h="40px" borderRadius="md" />;
     }
 

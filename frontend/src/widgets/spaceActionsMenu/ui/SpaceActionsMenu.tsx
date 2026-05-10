@@ -41,7 +41,7 @@ export const SpaceActionsMenu: FC<SpaceActionsMenuProps> = ({
                     <IconButton
                         aria-label="Действия с пространством"
                         variant="ghost"
-                        size="sm"
+                        size="2xs"
                         {...triggerProps}
                     >
                         <LuEllipsis />

@@ -31,7 +31,12 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
                     <Breadcrumb.Link asChild>
                         <Link to={`/${orgSlug}/spaces`}>
                             {orgName ? (
-                                <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                <Text
+                                    as="span"
+                                    display="inline-block"
+                                    maxW={crumbMaxWidth}
+                                    truncate
+                                >
                                     {orgName}
                                 </Text>
                             ) : (
@@ -50,7 +55,12 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
                             onClick={onRootClick}
                         >
                             {spaceName ? (
-                                <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                <Text
+                                    as="span"
+                                    display="inline-block"
+                                    maxW={crumbMaxWidth}
+                                    truncate
+                                >
                                     {spaceName}
                                 </Text>
                             ) : (
@@ -70,7 +80,12 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
                             <Breadcrumb.Item>
                                 {isLast ? (
                                     <Breadcrumb.CurrentLink>
-                                        <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                        <Text
+                                            as="span"
+                                            display="inline-block"
+                                            maxW={crumbMaxWidth}
+                                            truncate
+                                        >
                                             {folder.title}
                                         </Text>
                                     </Breadcrumb.CurrentLink>
@@ -79,7 +94,12 @@ export const SpaceHomeBreadcrumbs: FC<SpaceHomeBreadcrumbsProps> = ({
                                         <Link
                                             to={`/${orgSlug}/${spaceKey}?folderId=${folder.id}`}
                                         >
-                                            <Text as="span" display="inline-block" maxW={crumbMaxWidth} truncate>
+                                            <Text
+                                                as="span"
+                                                display="inline-block"
+                                                maxW={crumbMaxWidth}
+                                                truncate
+                                            >
                                                 {folder.title}
                                             </Text>
                                         </Link>

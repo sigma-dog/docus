@@ -149,7 +149,19 @@ export const organizationsApi = api.injectEndpoints({
                 method: apiMethods.post,
                 body,
             }),
-            invalidatesTags: [tagTypes.Organizations],
+            invalidatesTags: (result) => {
+                const organizationSlug = result?.organization?.slug;
+
+                return organizationSlug
+                    ? [
+                          tagTypes.Organizations,
+                          {
+                              type: tagTypes.Organizations,
+                              id: organizationSlug,
+                          },
+                      ]
+                    : [tagTypes.Organizations];
+            },
         }),
 
         searchOrgPages: build.query<

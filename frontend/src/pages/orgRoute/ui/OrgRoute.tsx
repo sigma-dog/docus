@@ -12,9 +12,13 @@ export const OrgRoute = () => {
 
     const onSpacesPage = !!useMatch('/:orgSlug/spaces');
 
-    const { data: spaces, isLoading } = useGetSpacesQuery(orgSlug!);
+    const {
+        currentData: spaces,
+        isLoading,
+        isFetching,
+    } = useGetSpacesQuery(orgSlug!, { refetchOnMountOrArgChange: true });
 
-    if (isLoading) {
+    if (isLoading || (isFetching && !spaces)) {
         return (
             <Center w="100vw" h="100vh">
                 <Spinner size="lg" />

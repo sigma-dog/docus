@@ -72,7 +72,7 @@ export const OrganizationProfileSection: FC<
                                     }
                                     onBlur={onResetName}
                                     autoFocus
-                                    maxW="320px"
+                                    maxW="full"
                                     fontSize="md"
                                     fontWeight="semibold"
                                     h="8"
@@ -98,7 +98,7 @@ export const OrganizationProfileSection: FC<
                                 fontWeight="semibold"
                                 lineHeight="short"
                                 lineClamp={1}
-                                maxW="360px"
+                                maxW="full"
                             >
                                 {name}
                             </Text>

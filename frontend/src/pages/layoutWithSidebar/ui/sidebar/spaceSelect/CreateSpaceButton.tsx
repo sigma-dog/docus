@@ -22,7 +22,7 @@ export const CreateSpaceItem: FC<CreateSpaceItemProps> = ({
                 variant="ghost"
                 colorPalette="blue"
                 w="full"
-                size="md"
+                size="xs"
                 onClick={() => setIsOpen(true)}
             >
                 <HStack>

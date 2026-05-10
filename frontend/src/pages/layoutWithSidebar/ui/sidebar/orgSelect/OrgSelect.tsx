@@ -1,5 +1,5 @@
 import { type FC, useState } from 'react';
-import { LuPlus } from 'react-icons/lu';
+import { LuLogIn, LuPlus } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import {
     Avatar,
@@ -17,16 +17,19 @@ import { useGetOrganizationsQuery } from 'shared/api';
 import type { Organization } from 'shared/types';
 
 import { CreateOrgDialog } from './CreateOrgDialog';
+import { JoinOrgDialog } from './JoinOrgDialog';
 
 type OrgSelectProps = {
     selectedSlug: string;
 };
 
 const addOrgItem = { label: 'Создать организацию', value: 'add_org' };
+const joinOrgItem = { label: 'Войти в организацию', value: 'join_org' };
 
 export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
     const navigate = useNavigate();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
     const { data: organizations = [], isLoading } = useGetOrganizationsQuery();
 
     const items = organizations.map((o: Organization) => ({
@@ -35,14 +38,14 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
     }));
 
     const collection = createListCollection({
-        items: [...items, addOrgItem],
+        items: [...items, addOrgItem, joinOrgItem],
     });
 
     const selectedOrg = organizations.find((o) => o.slug === selectedSlug);
 
     const handleValueChange = (details: { value: string[] }) => {
         const value = details.value[0];
-        if (value === 'add_org') {
+        if (value === 'add_org' || value === 'join_org') {
             return;
         }
         navigate(`/${value}`);
@@ -122,11 +125,31 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
                                         variant="ghost"
                                         colorPalette="blue"
                                         w="full"
-                                        size="md"
+                                        size="xs"
                                         onClick={() => setIsDialogOpen(true)}
                                     >
                                         <HStack>
                                             <LuPlus />
+                                            {item.label}
+                                        </HStack>
+                                    </Button>
+                                );
+                            }
+
+                            if (item.value === 'join_org') {
+                                return (
+                                    <Button
+                                        key={item.value}
+                                        justifyContent="flex-start"
+                                        variant="ghost"
+                                        w="full"
+                                        size="xs"
+                                        onClick={() =>
+                                            setIsJoinDialogOpen(true)
+                                        }
+                                    >
+                                        <HStack>
+                                            <LuLogIn />
                                             {item.label}
                                         </HStack>
                                     </Button>
@@ -155,6 +178,10 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
             <CreateOrgDialog
                 isOpen={isDialogOpen}
                 onClose={() => setIsDialogOpen(false)}
+            />
+            <JoinOrgDialog
+                isOpen={isJoinDialogOpen}
+                onClose={() => setIsJoinDialogOpen(false)}
             />
         </>
     );

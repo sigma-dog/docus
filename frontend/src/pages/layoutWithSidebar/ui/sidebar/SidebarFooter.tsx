@@ -1,14 +1,9 @@
-import type { FC } from 'react';
 import { LuInfo, LuSettings } from 'react-icons/lu';
 import { Button, HStack, Icon, Stack, Text } from '@chakra-ui/react';
 
 import { UserSettingsDialog } from 'widgets/userSettingsMenu';
 
-type SidebarFooterProps = {
-    isExpanded: boolean;
-};
-
-export const SidebarFooter: FC<SidebarFooterProps> = ({ isExpanded }) => {
+export const SidebarFooter = () => {
     return (
         <Stack gap={2} borderTopWidth="1px" borderColor="border.default" pt={4}>
             <HStack gap={2} cursor="pointer" _hover={{ color: 'fg' }}>
@@ -16,11 +11,9 @@ export const SidebarFooter: FC<SidebarFooterProps> = ({ isExpanded }) => {
                     <LuInfo />
                 </Icon>
 
-                {isExpanded && (
-                    <Text fontSize="xs" color="fg.muted">
-                        Помощь
-                    </Text>
-                )}
+                <Text fontSize="xs" color="fg.muted">
+                    Помощь
+                </Text>
             </HStack>
             <UserSettingsDialog
                 trigger={
@@ -36,11 +29,9 @@ export const SidebarFooter: FC<SidebarFooterProps> = ({ isExpanded }) => {
                         <Icon boxSize={4} color="fg.muted">
                             <LuSettings />
                         </Icon>
-                        {isExpanded && (
-                            <Text fontSize="xs" color="fg.muted">
-                                Настройки
-                            </Text>
-                        )}
+                        <Text fontSize="xs" color="fg.muted">
+                            Настройки
+                        </Text>
                     </Button>
                 }
             />

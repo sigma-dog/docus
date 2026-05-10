@@ -13,16 +13,12 @@ import { Company } from './Company';
 import { SidebarFooter } from './SidebarFooter';
 import { SidebarHeader } from './SidebarHeader';
 
-const EXPANDED_WIDTH = 375;
-const COLLAPSED_WIDTH = 90;
-
 type CreateIntent = {
     isFolder: boolean;
     parentId?: string;
 };
 
 export const Sidebar = () => {
-    const [isExpanded, setIsExpanded] = useState(true);
     const [createIntent, setCreateIntent] = useState<CreateIntent | null>(null);
     const { data: organizations = [] } = useGetOrganizationsQuery();
     const { orgSlug, spaceKey } = useParams<{
@@ -52,14 +48,10 @@ export const Sidebar = () => {
         navigate(`/${selectedOrg.slug}/${key}`);
     };
 
-    const toggleExpanded = () => {
-        setIsExpanded((prev) => !prev);
-    };
-
     return (
         <Flex
             direction="column"
-            w={isExpanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
+            w={375}
             flexShrink={0}
             borderRightWidth="1px"
             borderColor="border.default"
@@ -67,10 +59,7 @@ export const Sidebar = () => {
             overflow="hidden"
             transition="all 0.3s ease"
         >
-            <SidebarHeader
-                toggleExpanded={toggleExpanded}
-                isExpanded={isExpanded}
-            />
+            <SidebarHeader />
             <Flex
                 direction="column"
                 justify="space-between"
@@ -79,14 +68,12 @@ export const Sidebar = () => {
                 bg="bg.subtle"
                 p={4}
             >
-                <Stack gap={5} alignItems={isExpanded ? 'stretch' : 'center'}>
-                    <Company
-                        organization={selectedOrg}
-                        isExpanded={isExpanded}
-                    />
+                <Stack gap={5} alignItems="stretch">
+                    <Company organization={selectedOrg} />
 
-                    {isExpanded && selectedOrg && spaceKey && (
+                    {selectedOrg && spaceKey && (
                         <SpaceSelect
+                            key={selectedOrg.slug}
                             selectedKey={spaceKey}
                             onSelect={handleSelectSpace}
                             organizationSlug={selectedOrg.slug}
@@ -96,26 +83,23 @@ export const Sidebar = () => {
                     <Stack gap={4}>
                         {spaceKey && (
                             <AddButton
-                                isExpanded={isExpanded}
                                 onCreatePage={() => openCreate(false)}
                                 onCreateFolder={() => openCreate(true)}
                             />
                         )}
-                        {isExpanded && (
-                            <Navigation
-                                key={`${orgSlug}:${spaceKey}`}
-                                onCreatePage={(parentId) =>
-                                    openCreate(false, parentId)
-                                }
-                                onCreateFolder={(parentId) =>
-                                    openCreate(true, parentId)
-                                }
-                            />
-                        )}
+                        <Navigation
+                            key={`${orgSlug}:${spaceKey}`}
+                            onCreatePage={(parentId) =>
+                                openCreate(false, parentId)
+                            }
+                            onCreateFolder={(parentId) =>
+                                openCreate(true, parentId)
+                            }
+                        />
                     </Stack>
                 </Stack>
 
-                <SidebarFooter isExpanded={isExpanded} />
+                <SidebarFooter />
             </Flex>
 
             {orgSlug && spaceKey && createIntent && (
