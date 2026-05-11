@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
     Box,
@@ -28,11 +28,13 @@ import {
 import { useCurrentSpacePermissions } from 'shared/lib';
 
 import { isPageContentEmpty } from './utils';
+import { extractTocHeadings } from './utils';
 import { Breadcrumbs } from '../Breadcrumbs';
 import { Editor } from '../Editor';
 import { EmptyPageState } from '../EmptyPageState';
 import { Header } from '../header/Header';
 import { HistoryPanel } from '../history/HistoryPanel';
+import { TableOfContents } from '../TableOfContents';
 
 const lowlight = createLowlight(all);
 
@@ -47,6 +49,8 @@ export const PageView = () => {
     const [isShowingHistory, setIsShowingHistory] = useState(false);
     const { data: userSettings } = useGetUserSettingsQuery();
     const { canEdit } = useCurrentSpacePermissions();
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const { data: page, isLoading } = useGetPageQuery(
         { orgSlug: orgSlug!, spaceKey: spaceKey!, pageId: pageId! },
@@ -56,6 +60,10 @@ export const PageView = () => {
     const [updatePage, { isLoading: isSaving }] = useUpdatePageMutation();
     const isEmptyPage = isPageContentEmpty(page?.content ?? null);
     const effectiveIsEditing = isEditing && canEdit;
+    const tocHeadings = useMemo(
+        () => extractTocHeadings(page?.content ?? null),
+        [page?.content]
+    );
 
     const editor = useEditor({
         extensions: [
@@ -81,6 +89,32 @@ export const PageView = () => {
             editor.commands.setContent(page.content ?? '');
         }
     }, [editor, page]);
+
+    useEffect(() => {
+        if (!contentRef.current) {
+            return;
+        }
+
+        const headingElements = contentRef.current.querySelectorAll(
+            'h1, h2, h3, h4, h5, h6'
+        );
+
+        headingElements.forEach((heading, index) => {
+            const tocHeading = tocHeadings[index];
+
+            if (!(heading instanceof HTMLElement)) {
+                return;
+            }
+
+            if (!tocHeading) {
+                heading.removeAttribute('data-toc-id');
+                return;
+            }
+
+            heading.setAttribute('data-toc-id', tocHeading.id);
+            heading.style.scrollMarginTop = '24px';
+        });
+    }, [tocHeadings, page?.content]);
 
     useEffect(() => {
         if (editor) {
@@ -121,6 +155,33 @@ export const PageView = () => {
         setIsEditing(false);
     };
 
+    const handleTocSelect = (headingId: string) => {
+        if (!scrollContainerRef.current || !contentRef.current) {
+            return;
+        }
+
+        const heading = contentRef.current.querySelector(
+            `[data-toc-id="${headingId}"]`
+        );
+
+        if (!(heading instanceof HTMLElement)) {
+            return;
+        }
+
+        const scrollContainer = scrollContainerRef.current;
+        const offset = 24;
+        const top =
+            scrollContainer.scrollTop +
+            heading.getBoundingClientRect().top -
+            scrollContainer.getBoundingClientRect().top -
+            offset;
+
+        scrollContainer.scrollTo({
+            top,
+            behavior: 'smooth',
+        });
+    };
+
     if (!orgSlug || !spaceKey || !pageId) {
         return null;
     }
@@ -146,11 +207,19 @@ export const PageView = () => {
     return (
         <Grid
             flex="1"
-            templateColumns={isShowingHistory ? '1fr 320px' : '1fr'}
+            templateColumns={{
+                base: '1fr',
+                xl: isShowingHistory ? 'minmax(0, 1fr) 320px' : '1fr',
+            }}
             h="100%"
             overflow="hidden"
         >
-            <GridItem overflowY="auto" bg="bg.subtle" p={8}>
+            <GridItem
+                ref={scrollContainerRef}
+                overflowY="auto"
+                bg="bg.subtle"
+                p={8}
+            >
                 <Stack gap={6}>
                     <Breadcrumbs
                         orgSlug={orgSlug}
@@ -158,51 +227,81 @@ export const PageView = () => {
                         pageId={pageId}
                     />
 
-                    <Center w="full">
-                        <Stack
-                            gap={2}
-                            alignItems="center"
-                            w={isCompact ? '960px' : 'full'}
-                        >
-                            <Header
-                                canEdit={canEdit}
-                                editorWidth={
-                                    userSettings?.editorWidth ?? 'COMPACT'
-                                }
-                                page={page}
-                                isEditing={effectiveIsEditing}
-                                isShowingHistory={isShowingHistory}
-                                handleRenameTitle={handleRenameTitle}
-                                setIsEditing={setIsEditing}
-                                setIsShowingHistory={setIsShowingHistory}
-                            />
+                    <Grid
+                        w="full"
+                        templateColumns={{
+                            base: '1fr',
+                            xl:
+                                tocHeadings.length > 0
+                                    ? '240px minmax(0, 1fr)'
+                                    : '1fr',
+                        }}
+                        gap={6}
+                        alignItems="start"
+                    >
+                        {tocHeadings.length > 0 && (
+                            <GridItem
+                                display={{ base: 'none', xl: 'block' }}
+                                position="sticky"
+                                top="-30px"
+                                alignSelf="start"
+                            >
+                                <TableOfContents
+                                    headings={tocHeadings}
+                                    onSelect={handleTocSelect}
+                                />
+                            </GridItem>
+                        )}
 
-                            {isEmptyPage && !effectiveIsEditing ? (
-                                <EmptyPageState
+                        <Center w="full">
+                            <Stack
+                                gap={2}
+                                alignItems="center"
+                                w={isCompact ? '960px' : 'full'}
+                            >
+                                <Header
                                     canEdit={canEdit}
                                     editorWidth={
                                         userSettings?.editorWidth ?? 'COMPACT'
                                     }
-                                    onStartEditing={
-                                        canEdit
-                                            ? () => setIsEditing(true)
-                                            : undefined
-                                    }
-                                />
-                            ) : (
-                                <Editor
-                                    editor={editor}
-                                    editorWidth={
-                                        userSettings?.editorWidth ?? 'COMPACT'
-                                    }
+                                    page={page}
                                     isEditing={effectiveIsEditing}
-                                    isSaving={isSaving}
-                                    handleSave={handleSave}
-                                    handleCancel={handleCancel}
+                                    isShowingHistory={isShowingHistory}
+                                    handleRenameTitle={handleRenameTitle}
+                                    setIsEditing={setIsEditing}
+                                    setIsShowingHistory={setIsShowingHistory}
                                 />
-                            )}
-                        </Stack>
-                    </Center>
+
+                                {isEmptyPage && !effectiveIsEditing ? (
+                                    <EmptyPageState
+                                        canEdit={canEdit}
+                                        editorWidth={
+                                            userSettings?.editorWidth ??
+                                            'COMPACT'
+                                        }
+                                        onStartEditing={
+                                            canEdit
+                                                ? () => setIsEditing(true)
+                                                : undefined
+                                        }
+                                    />
+                                ) : (
+                                    <Editor
+                                        editor={editor}
+                                        editorWidth={
+                                            userSettings?.editorWidth ??
+                                            'COMPACT'
+                                        }
+                                        contentRef={contentRef}
+                                        isEditing={effectiveIsEditing}
+                                        isSaving={isSaving}
+                                        handleSave={handleSave}
+                                        handleCancel={handleCancel}
+                                    />
+                                )}
+                            </Stack>
+                        </Center>
+                    </Grid>
                 </Stack>
             </GridItem>
 

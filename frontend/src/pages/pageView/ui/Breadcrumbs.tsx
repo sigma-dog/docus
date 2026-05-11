@@ -59,7 +59,7 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = memo(function Breadcrumbs({
 
     return (
         <Breadcrumb.Root>
-            <Breadcrumb.List>
+            <Breadcrumb.List minH="40px">
                 {org && (
                     <Breadcrumb.Item>
                         <Breadcrumb.Link asChild>

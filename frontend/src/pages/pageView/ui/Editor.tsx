@@ -9,6 +9,7 @@ import { CompactMoreControls } from './CompactMoreControls';
 
 type EditorProps = {
     editor: ReturnType<typeof useEditor> | null;
+    contentRef?: React.Ref<HTMLDivElement>;
     editorWidth: EditorWidth;
     isEditing: boolean;
     isSaving: boolean;
@@ -18,6 +19,7 @@ type EditorProps = {
 
 export const Editor: FC<EditorProps> = ({
     editor,
+    contentRef,
     editorWidth,
     isEditing,
     isSaving,
@@ -104,7 +106,7 @@ export const Editor: FC<EditorProps> = ({
                     </HStack>
                 </RichTextEditor.Toolbar>
             )}
-            <RichTextEditor.Content />
+            <RichTextEditor.Content ref={contentRef} />
         </RichTextEditor.Root>
     );
 };
