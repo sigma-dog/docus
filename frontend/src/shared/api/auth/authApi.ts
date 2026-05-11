@@ -1,8 +1,8 @@
 import type { LoginBody, RegisterBody } from './types';
+import { setUserInfo } from '../../lib';
 import type { User } from '../../types';
 import { api } from '../api';
 import { apiMethods, tagTypes } from '../constants';
-import { setUserInfo } from '../../lib';
 
 const getUrl = () => 'auth';
 
@@ -42,12 +42,59 @@ export const authApi = api.injectEndpoints({
 
         updateCurrentUser: build.mutation<
             User,
-            Pick<User, 'username' | 'email' | 'avatarUrl'>
+            Pick<User, 'username' | 'email'>
         >({
             query: (body) => ({
                 url: `${getUrl()}/me`,
                 method: apiMethods.patch,
                 body,
+            }),
+            invalidatesTags: [tagTypes.CurrentUser],
+            async onQueryStarted(_body, { dispatch, queryFulfilled }) {
+                const { data } = await queryFulfilled;
+
+                setUserInfo(data);
+                dispatch(
+                    authApi.util.updateQueryData(
+                        'getCurrentUser',
+                        undefined,
+                        () => data
+                    )
+                );
+            },
+        }),
+
+        uploadCurrentUserAvatar: build.mutation<User, File>({
+            query: (file) => {
+                const formData = new FormData();
+
+                formData.append('file', file);
+
+                return {
+                    url: `${getUrl()}/me/avatar`,
+                    method: apiMethods.post,
+                    body: formData,
+                };
+            },
+            invalidatesTags: [tagTypes.CurrentUser],
+            async onQueryStarted(_body, { dispatch, queryFulfilled }) {
+                const { data } = await queryFulfilled;
+
+                setUserInfo(data);
+                dispatch(
+                    authApi.util.updateQueryData(
+                        'getCurrentUser',
+                        undefined,
+                        () => data
+                    )
+                );
+            },
+        }),
+
+        removeCurrentUserAvatar: build.mutation<User, void>({
+            query: () => ({
+                url: `${getUrl()}/me/avatar`,
+                method: apiMethods.delete,
             }),
             invalidatesTags: [tagTypes.CurrentUser],
             async onQueryStarted(_body, { dispatch, queryFulfilled }) {
@@ -76,6 +123,8 @@ export const {
     useLoginMutation,
     useRegisterMutation,
     useGetCurrentUserQuery,
+    useRemoveCurrentUserAvatarMutation,
     useUpdateCurrentUserMutation,
+    useUploadCurrentUserAvatarMutation,
     useLogoutMutation,
 } = authApi;
