@@ -6,13 +6,17 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
+import sharp from 'sharp';
 
+import type { UploadedImageFile } from '../S3/types/uploaded-image-file.type';
+import { MAX_AVATAR_IMAGE_SIZE_BYTES } from '../common/constants/files.constants';
 import {
     extractPlainText,
     extractSnippet,
     type Snippet,
 } from '../common/utils/tiptap';
 import { PrismaService } from '../prisma/prisma.service';
+import { S3Service } from '../S3/S3.service';
 import { AddOrgMemberDto } from './dto/add-org-member.dto';
 import { CreateInviteDto } from './dto/create-invite.dto';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -21,7 +25,10 @@ import { UpdateOrganizationDto } from './dto/update-organization.dto';
 
 @Injectable()
 export class OrganizationsService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private readonly s3Service: S3Service
+    ) {}
 
     async create(userId: string, dto: CreateOrganizationDto) {
         const exists = await this.prisma.organization.findUnique({
@@ -92,12 +99,99 @@ export class OrganizationsService {
         });
     }
 
+    async updateAvatar(
+        slug: string,
+        userId: string,
+        file: UploadedImageFile
+    ) {
+        if (!file) {
+            throw new BadRequestException('Файл не предоставлен');
+        }
+
+        if (!file.mimetype.startsWith('image/')) {
+            throw new BadRequestException('Можно загружать только изображения');
+        }
+
+        if (file.size > MAX_AVATAR_IMAGE_SIZE_BYTES) {
+            throw new BadRequestException(
+                'Размер файла не должен превышать 5MB'
+            );
+        }
+
+        const org = await this.getOrgOrThrow(slug);
+        this.assertAdminOrOwner(org, userId);
+
+        const compressedImageBuffer = await sharp(file.buffer)
+            .resize(300, 300, {
+                fit: 'cover',
+                position: 'center',
+            })
+            .webp({
+                quality: 80,
+                effort: 4,
+                alphaQuality: 80,
+            })
+            .toBuffer();
+
+        const fileKey = `organizations/${org.id}/avatar/${Date.now()}.webp`;
+        const avatarUrl = await this.s3Service.uploadFile({
+            fileKey,
+            buffer: compressedImageBuffer,
+            contentType: 'image/webp',
+        });
+
+        if (org.avatarUrl) {
+            const oldAvatarFileKey = this.s3Service.parseFileKeyFromUrl(
+                org.avatarUrl
+            );
+
+            this.s3Service.removeFile(oldAvatarFileKey).catch(console.error);
+        }
+
+        return this.prisma.organization.update({
+            where: { id: org.id },
+            data: { avatarUrl },
+            include: {
+                _count: { select: { members: true, spaces: true } },
+            },
+        });
+    }
+
+    async removeAvatar(slug: string, userId: string) {
+        const org = await this.getOrgOrThrow(slug);
+        this.assertAdminOrOwner(org, userId);
+
+        if (org.avatarUrl) {
+            const oldAvatarFileKey = this.s3Service.parseFileKeyFromUrl(
+                org.avatarUrl
+            );
+
+            this.s3Service.removeFile(oldAvatarFileKey).catch(console.error);
+        }
+
+        return this.prisma.organization.update({
+            where: { id: org.id },
+            data: { avatarUrl: null },
+            include: {
+                _count: { select: { members: true, spaces: true } },
+            },
+        });
+    }
+
     async remove(slug: string, userId: string) {
         const org = await this.getOrgOrThrow(slug);
         if (org.ownerId !== userId)
             throw new ForbiddenException(
                 'Only the owner can delete this organization'
             );
+
+        if (org.avatarUrl) {
+            const oldAvatarFileKey = this.s3Service.parseFileKeyFromUrl(
+                org.avatarUrl
+            );
+
+            this.s3Service.removeFile(oldAvatarFileKey).catch(console.error);
+        }
 
         await this.prisma.organization.delete({ where: { slug } });
     }

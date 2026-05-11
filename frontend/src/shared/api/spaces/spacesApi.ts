@@ -71,6 +71,38 @@ export const spacesApi = api.injectEndpoints({
             ],
         }),
 
+        uploadSpaceAvatar: build.mutation<
+            Space,
+            SpaceActionArgs & { file: File }
+        >({
+            query: ({ key, organizationSlug, file }) => {
+                const formData = new FormData();
+
+                formData.append('file', file);
+
+                return {
+                    url: `${getUrl()}/${key}/avatar?organizationSlug=${organizationSlug}`,
+                    method: apiMethods.post,
+                    body: formData,
+                };
+            },
+            invalidatesTags: (_result, _error, { key }) => [
+                { type: tagTypes.Spaces, id: key },
+                tagTypes.Spaces,
+            ],
+        }),
+
+        removeSpaceAvatar: build.mutation<Space, SpaceActionArgs>({
+            query: ({ key, organizationSlug }) => ({
+                url: `${getUrl()}/${key}/avatar?organizationSlug=${organizationSlug}`,
+                method: apiMethods.delete,
+            }),
+            invalidatesTags: (_result, _error, { key }) => [
+                { type: tagTypes.Spaces, id: key },
+                tagTypes.Spaces,
+            ],
+        }),
+
         deleteSpace: build.mutation<void, SpaceActionArgs>({
             query: ({ key, organizationSlug }) => ({
                 url: `${getUrl()}/${key}?organizationSlug=${organizationSlug}`,
@@ -119,6 +151,8 @@ export const {
     useGetSpaceQuery,
     useCreateSpaceMutation,
     useUpdateSpaceMutation,
+    useUploadSpaceAvatarMutation,
+    useRemoveSpaceAvatarMutation,
     useDeleteSpaceMutation,
     useUpdateSpaceMemberMutation,
     useRemoveSpaceMemberMutation,

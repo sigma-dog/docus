@@ -16,7 +16,9 @@ import {
 import {
     useCreateInviteMutation,
     useGetOrganizationQuery,
+    useRemoveOrganizationAvatarMutation,
     useRemoveOrgMemberMutation,
+    useUploadOrganizationAvatarMutation,
     useUpdateOrganizationMutation,
     useUpdateOrgMemberRoleMutation,
 } from 'shared/api';
@@ -60,6 +62,10 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
     });
     const [updateOrganization, { isLoading: isSaving }] =
         useUpdateOrganizationMutation();
+    const [uploadOrganizationAvatar, { isLoading: isUploadingAvatar }] =
+        useUploadOrganizationAvatarMutation();
+    const [removeOrganizationAvatar, { isLoading: isRemovingAvatar }] =
+        useRemoveOrganizationAvatarMutation();
     const [removeOrgMember, { isLoading: isRemovingMember }] =
         useRemoveOrgMemberMutation();
     const [updateOrgMemberRole, { isLoading: isUpdatingRole }] =
@@ -99,6 +105,7 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
         return currentMember?.role === 'ADMIN';
     }, [currentMember?.role, currentUser, organizationDetails]);
     const canEditOrganization = canManageMembers;
+    const isUpdatingAvatar = isUploadingAvatar || isRemovingAvatar;
 
     const handleDrawerOpenChange = (open: boolean) => {
         setIsDrawerOpen(open);
@@ -181,6 +188,55 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                 type: 'error',
                 title: 'Ошибка',
                 description: 'Не удалось обновить описание организации',
+            });
+        }
+    };
+
+    const handleAvatarChange = async (file: File | null) => {
+        if (!file) {
+            return;
+        }
+
+        try {
+            await uploadOrganizationAvatar({
+                slug: organization.slug,
+                file,
+            }).unwrap();
+            toaster.create({
+                type: 'success',
+                title: 'Аватар обновлён',
+            });
+        } catch {
+            toaster.create({
+                type: 'error',
+                title: 'Ошибка',
+                description: 'Не удалось загрузить аватар организации',
+            });
+        }
+    };
+
+    const handleAvatarReject = () => {
+        toaster.create({
+            type: 'error',
+            title: 'Неподходящий файл',
+            description: 'Поддерживаются JPG, PNG, WEBP и GIF до 5 МБ',
+        });
+    };
+
+    const handleAvatarRemove = async () => {
+        try {
+            await removeOrganizationAvatar({
+                slug: organization.slug,
+            }).unwrap();
+            toaster.create({
+                type: 'success',
+                title: 'Аватар удалён',
+            });
+        } catch {
+            toaster.create({
+                type: 'error',
+                title: 'Ошибка',
+                description: 'Не удалось удалить аватар организации',
             });
         }
     };
@@ -331,6 +387,9 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                                             description={
                                                 organizationDetails.description
                                             }
+                                            avatarUrl={
+                                                organizationDetails.avatarUrl
+                                            }
                                             canEditOrganization={
                                                 canEditOrganization
                                             }
@@ -341,6 +400,7 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                                                 isEditingDescription
                                             }
                                             isSaving={isSaving}
+                                            isUpdatingAvatar={isUpdatingAvatar}
                                             onNameChange={setName}
                                             onDescriptionChange={setDescription}
                                             onStartEditingName={
@@ -353,6 +413,9 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                                             onResetDescription={
                                                 resetDescription
                                             }
+                                            onAvatarChange={handleAvatarChange}
+                                            onAvatarReject={handleAvatarReject}
+                                            onAvatarRemove={handleAvatarRemove}
                                             onSubmitName={handleNameSubmit}
                                             onSubmitDescription={
                                                 handleDescriptionSubmit

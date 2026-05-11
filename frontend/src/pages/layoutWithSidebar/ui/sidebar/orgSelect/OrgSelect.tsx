@@ -42,6 +42,12 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
     });
 
     const selectedOrg = organizations.find((o) => o.slug === selectedSlug);
+    const orgAvatarBySlug = new Map(
+        organizations.map((organization) => [
+            organization.slug,
+            organization.avatarUrl,
+        ])
+    );
 
     const handleValueChange = (details: { value: string[] }) => {
         const value = details.value[0];
@@ -67,6 +73,11 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
                     <Select.Trigger p={0}>
                         <HStack gap={2}>
                             <Avatar.Root size="md" shape="rounded">
+                                {selectedOrg?.avatarUrl ? (
+                                    <Avatar.Image
+                                        src={selectedOrg.avatarUrl}
+                                    />
+                                ) : null}
                                 <Avatar.Fallback
                                     name={selectedOrg?.name ?? ''}
                                 />
@@ -160,6 +171,15 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
                                 <Select.Item key={item.value} item={item}>
                                     <HStack gap={2}>
                                         <Avatar.Root size="2xs" shape="rounded">
+                                            {orgAvatarBySlug.get(item.value) ? (
+                                                <Avatar.Image
+                                                    src={
+                                                        orgAvatarBySlug.get(
+                                                            item.value
+                                                        ) ?? ''
+                                                    }
+                                                />
+                                            ) : null}
                                             <Avatar.Fallback
                                                 name={item.label}
                                             />

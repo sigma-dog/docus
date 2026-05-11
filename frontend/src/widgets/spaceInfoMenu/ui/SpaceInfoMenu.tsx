@@ -14,7 +14,9 @@ import {
 
 import {
     useGetSpaceQuery,
+    useRemoveSpaceAvatarMutation,
     useRemoveSpaceMemberMutation,
+    useUploadSpaceAvatarMutation,
     useUpdateSpaceMemberMutation,
     useUpdateSpaceMutation,
 } from 'shared/api';
@@ -68,6 +70,10 @@ export const SpaceInfoMenu: FC<SpaceInfoMenuProps> = ({
         }
     );
     const [updateSpace, { isLoading: isSaving }] = useUpdateSpaceMutation();
+    const [uploadSpaceAvatar, { isLoading: isUploadingAvatar }] =
+        useUploadSpaceAvatarMutation();
+    const [removeSpaceAvatar, { isLoading: isRemovingAvatar }] =
+        useRemoveSpaceAvatarMutation();
     const [updateSpaceMember, { isLoading: isUpdatingRole }] =
         useUpdateSpaceMemberMutation();
     const [removeSpaceMember] = useRemoveSpaceMemberMutation();
@@ -79,6 +85,7 @@ export const SpaceInfoMenu: FC<SpaceInfoMenuProps> = ({
         currentAccessMember.role === 'ADMIN' &&
         currentAccessMember.source !== 'organization_member'
     );
+    const isUpdatingAvatar = isUploadingAvatar || isRemovingAvatar;
 
     const handleDrawerOpenChange = (open: boolean) => {
         if (onOpenChange) {
@@ -161,6 +168,57 @@ export const SpaceInfoMenu: FC<SpaceInfoMenuProps> = ({
                 type: 'error',
                 title: 'Ошибка',
                 description: 'Не удалось обновить описание пространства',
+            });
+        }
+    };
+
+    const handleAvatarChange = async (file: File | null) => {
+        if (!file) {
+            return;
+        }
+
+        try {
+            await uploadSpaceAvatar({
+                key: space.key,
+                organizationSlug,
+                file,
+            }).unwrap();
+            toaster.create({
+                type: 'success',
+                title: 'Аватар обновлён',
+            });
+        } catch {
+            toaster.create({
+                type: 'error',
+                title: 'Ошибка',
+                description: 'Не удалось загрузить аватар пространства',
+            });
+        }
+    };
+
+    const handleAvatarReject = () => {
+        toaster.create({
+            type: 'error',
+            title: 'Неподходящий файл',
+            description: 'Поддерживаются JPG, PNG, WEBP и GIF до 5 МБ',
+        });
+    };
+
+    const handleAvatarRemove = async () => {
+        try {
+            await removeSpaceAvatar({
+                key: space.key,
+                organizationSlug,
+            }).unwrap();
+            toaster.create({
+                type: 'success',
+                title: 'Аватар удалён',
+            });
+        } catch {
+            toaster.create({
+                type: 'error',
+                title: 'Ошибка',
+                description: 'Не удалось удалить аватар пространства',
             });
         }
     };
@@ -275,6 +333,8 @@ export const SpaceInfoMenu: FC<SpaceInfoMenuProps> = ({
                                         name={spaceDetails.name}
                                         spaceKey={spaceDetails.key}
                                         description={spaceDetails.description}
+                                        avatarUrl={spaceDetails.avatarUrl}
+                                        canEditSpace={canManageMembers}
                                         editingName={name}
                                         editingDescription={description}
                                         isEditingName={isEditingName}
@@ -282,6 +342,7 @@ export const SpaceInfoMenu: FC<SpaceInfoMenuProps> = ({
                                             isEditingDescription
                                         }
                                         isSaving={isSaving}
+                                        isUpdatingAvatar={isUpdatingAvatar}
                                         onNameChange={setName}
                                         onDescriptionChange={setDescription}
                                         onStartEditingName={
@@ -292,6 +353,9 @@ export const SpaceInfoMenu: FC<SpaceInfoMenuProps> = ({
                                         }
                                         onResetName={resetName}
                                         onResetDescription={resetDescription}
+                                        onAvatarChange={handleAvatarChange}
+                                        onAvatarReject={handleAvatarReject}
+                                        onAvatarRemove={handleAvatarRemove}
                                         onSubmitName={handleNameSubmit}
                                         onSubmitDescription={
                                             handleDescriptionSubmit

@@ -62,6 +62,11 @@ export const SpaceSelect: FC<SpaceSelectProps> = ({
                     <Select.Trigger>
                         <HStack gap={2}>
                             <Avatar.Root size="2xs" shape="rounded">
+                                {selectedSpace?.avatarUrl ? (
+                                    <Avatar.Image
+                                        src={selectedSpace.avatarUrl}
+                                    />
+                                ) : null}
                                 <Avatar.Fallback
                                     name={
                                         selectedSpace?.name
@@ -107,6 +112,14 @@ export const SpaceSelect: FC<SpaceSelectProps> = ({
 
                             return (
                                 <Select.Item key={item.value} item={item}>
+                                    <Avatar.Root size="2xs" shape="rounded">
+                                        {space?.avatarUrl ? (
+                                            <Avatar.Image
+                                                src={space.avatarUrl}
+                                            />
+                                        ) : null}
+                                        <Avatar.Fallback name={item.label} />
+                                    </Avatar.Root>
                                     <Select.ItemText>
                                         {item.label}
                                     </Select.ItemText>

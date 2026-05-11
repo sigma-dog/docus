@@ -73,6 +73,41 @@ export const organizationsApi = api.injectEndpoints({
             ],
         }),
 
+        uploadOrganizationAvatar: build.mutation<
+            Organization,
+            { slug: string; file: File }
+        >({
+            query: ({ slug, file }) => {
+                const formData = new FormData();
+
+                formData.append('file', file);
+
+                return {
+                    url: `${getUrl()}/${slug}/avatar`,
+                    method: apiMethods.post,
+                    body: formData,
+                };
+            },
+            invalidatesTags: (_result, _error, { slug }) => [
+                { type: tagTypes.Organizations, id: slug },
+                tagTypes.Organizations,
+            ],
+        }),
+
+        removeOrganizationAvatar: build.mutation<
+            Organization,
+            { slug: string }
+        >({
+            query: ({ slug }) => ({
+                url: `${getUrl()}/${slug}/avatar`,
+                method: apiMethods.delete,
+            }),
+            invalidatesTags: (_result, _error, { slug }) => [
+                { type: tagTypes.Organizations, id: slug },
+                tagTypes.Organizations,
+            ],
+        }),
+
         deleteOrganization: build.mutation<void, string>({
             query: (slug) => ({
                 url: `${getUrl()}/${slug}`,
@@ -180,6 +215,8 @@ export const {
     useGetOrganizationQuery,
     useCreateOrganizationMutation,
     useUpdateOrganizationMutation,
+    useUploadOrganizationAvatarMutation,
+    useRemoveOrganizationAvatarMutation,
     useDeleteOrganizationMutation,
     useAddOrgMemberMutation,
     useRemoveOrgMemberMutation,

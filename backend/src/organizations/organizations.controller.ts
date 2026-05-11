@@ -9,9 +9,13 @@ import {
     Patch,
     Post,
     Query,
+    UploadedFile,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
+import type { UploadedImageFile } from '../S3/types/uploaded-image-file.type';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { type AuthUser } from '../common/types/auth.types';
@@ -50,6 +54,23 @@ export class OrganizationsController {
         @Body() dto: UpdateOrganizationDto
     ) {
         return this.organizationsService.update(slug, user.id, dto);
+    }
+
+    @Post(':slug/avatar')
+    @UseInterceptors(
+        FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } })
+    )
+    uploadAvatar(
+        @Param('slug') slug: string,
+        @CurrentUser() user: AuthUser,
+        @UploadedFile() file: UploadedImageFile
+    ) {
+        return this.organizationsService.updateAvatar(slug, user.id, file);
+    }
+
+    @Delete(':slug/avatar')
+    removeAvatar(@Param('slug') slug: string, @CurrentUser() user: AuthUser) {
+        return this.organizationsService.removeAvatar(slug, user.id);
     }
 
     @Delete(':slug')

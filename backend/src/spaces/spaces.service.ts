@@ -5,9 +5,13 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
+import sharp from 'sharp';
 
+import type { UploadedImageFile } from '../S3/types/uploaded-image-file.type';
+import { MAX_AVATAR_IMAGE_SIZE_BYTES } from '../common/constants/files.constants';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { S3Service } from '../S3/S3.service';
 import { AddMemberDto } from './dto/add-member.dto';
 import { CreateSpaceDto } from './dto/create-space.dto';
 import { UpdateSpaceMemberDto } from './dto/update-space-member.dto';
@@ -17,7 +21,8 @@ import { UpdateSpaceDto } from './dto/update-space.dto';
 export class SpacesService {
     constructor(
         private prisma: PrismaService,
-        private organizationsService: OrganizationsService
+        private organizationsService: OrganizationsService,
+        private readonly s3Service: S3Service
     ) {}
 
     async create(userId: string, dto: CreateSpaceDto) {
@@ -155,12 +160,100 @@ export class SpacesService {
         });
     }
 
+    async updateAvatar(
+        key: string,
+        userId: string,
+        orgSlug: string,
+        file: UploadedImageFile
+    ) {
+        if (!file) {
+            throw new BadRequestException('Файл не предоставлен');
+        }
+
+        if (!file.mimetype.startsWith('image/')) {
+            throw new BadRequestException('Можно загружать только изображения');
+        }
+
+        if (file.size > MAX_AVATAR_IMAGE_SIZE_BYTES) {
+            throw new BadRequestException(
+                'Размер файла не должен превышать 5MB'
+            );
+        }
+
+        const space = await this.getSpaceOrThrow(key, orgSlug);
+        this.assertAdminOrOwner(space, userId);
+
+        const compressedImageBuffer = await sharp(file.buffer)
+            .resize(300, 300, {
+                fit: 'cover',
+                position: 'center',
+            })
+            .webp({
+                quality: 80,
+                effort: 4,
+                alphaQuality: 80,
+            })
+            .toBuffer();
+
+        const fileKey = `spaces/${space.id}/avatar/${Date.now()}.webp`;
+        const avatarUrl = await this.s3Service.uploadFile({
+            fileKey,
+            buffer: compressedImageBuffer,
+            contentType: 'image/webp',
+        });
+
+        if (space.avatarUrl) {
+            const oldAvatarFileKey = this.s3Service.parseFileKeyFromUrl(
+                space.avatarUrl
+            );
+
+            this.s3Service.removeFile(oldAvatarFileKey).catch(console.error);
+        }
+
+        return this.prisma.space.update({
+            where: { id: space.id },
+            data: { avatarUrl },
+            include: {
+                _count: { select: { pages: true, members: true } },
+            },
+        });
+    }
+
+    async removeAvatar(key: string, userId: string, orgSlug: string) {
+        const space = await this.getSpaceOrThrow(key, orgSlug);
+        this.assertAdminOrOwner(space, userId);
+
+        if (space.avatarUrl) {
+            const oldAvatarFileKey = this.s3Service.parseFileKeyFromUrl(
+                space.avatarUrl
+            );
+
+            this.s3Service.removeFile(oldAvatarFileKey).catch(console.error);
+        }
+
+        return this.prisma.space.update({
+            where: { id: space.id },
+            data: { avatarUrl: null },
+            include: {
+                _count: { select: { pages: true, members: true } },
+            },
+        });
+    }
+
     async remove(key: string, userId: string, orgSlug?: string) {
         const space = await this.getSpaceOrThrow(key, orgSlug);
         if (space.ownerId !== userId) {
             throw new ForbiddenException(
                 'Only the owner can delete this space'
             );
+        }
+
+        if (space.avatarUrl) {
+            const oldAvatarFileKey = this.s3Service.parseFileKeyFromUrl(
+                space.avatarUrl
+            );
+
+            this.s3Service.removeFile(oldAvatarFileKey).catch(console.error);
         }
 
         await this.prisma.space.delete({ where: { id: space.id } });

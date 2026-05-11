@@ -4,6 +4,8 @@ export {
     useGetOrganizationQuery,
     useCreateOrganizationMutation,
     useUpdateOrganizationMutation,
+    useUploadOrganizationAvatarMutation,
+    useRemoveOrganizationAvatarMutation,
     useDeleteOrganizationMutation,
     useAddOrgMemberMutation,
     useRemoveOrgMemberMutation,

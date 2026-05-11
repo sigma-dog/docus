@@ -26,6 +26,9 @@ export const SpaceCard: FC<SpaceCardProps> = ({ space, orgSlug }) => {
             <Card.Body py={4}>
                 <HStack gap={5}>
                     <Avatar.Root size="md" shape="rounded">
+                        {space.avatarUrl ? (
+                            <Avatar.Image src={space.avatarUrl} />
+                        ) : null}
                         <Avatar.Fallback name={getInitials(name)} />
                     </Avatar.Root>
                     <Stack gap={0} flex="1" minW={0} align="flex-start">

@@ -4,6 +4,8 @@ export {
     useGetSpaceQuery,
     useCreateSpaceMutation,
     useUpdateSpaceMutation,
+    useUploadSpaceAvatarMutation,
+    useRemoveSpaceAvatarMutation,
     useDeleteSpaceMutation,
     useUpdateSpaceMemberMutation,
     useRemoveSpaceMemberMutation,

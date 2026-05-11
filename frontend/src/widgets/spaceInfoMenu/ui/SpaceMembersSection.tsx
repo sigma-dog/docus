@@ -54,6 +54,11 @@ export const SpaceMembersSection: FC<SpaceMembersSectionProps> = ({
                         >
                             <HStack gap={3} minW={0}>
                                 <Avatar.Root size="sm">
+                                    {member.user.avatarUrl ? (
+                                        <Avatar.Image
+                                            src={member.user.avatarUrl}
+                                        />
+                                    ) : null}
                                     <Avatar.Fallback
                                         name={member.user.username}
                                     />
