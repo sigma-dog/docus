@@ -1,6 +1,7 @@
-import type { User } from 'shared/types';
-
-export type RegisterBody = Pick<User, 'username' | 'email' | 'birthDate'> & {
+export type RegisterBody = {
+    username: string;
+    email: string;
+    birthDate: string;
     password: string;
 };
 

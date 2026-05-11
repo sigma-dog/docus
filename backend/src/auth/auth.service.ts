@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 interface JwtPayload {
     sub: string;
@@ -85,6 +86,58 @@ export class AuthService {
             data: { refreshToken: tokens.refresh },
         });
         return tokens;
+    }
+
+    async getCurrentUser(userId: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                avatarUrl: true,
+            },
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user;
+    }
+
+    async updateCurrentUser(userId: string, dto: UpdateProfileDto) {
+        const data = {
+            username: dto.username?.trim(),
+            email: dto.email?.trim().toLowerCase(),
+            avatarUrl: dto.avatarUrl?.trim() || null,
+        };
+
+        if (data.email) {
+            const existingUser = await this.prisma.user.findUnique({
+                where: { email: data.email },
+                select: { id: true },
+            });
+
+            if (existingUser && existingUser.id !== userId) {
+                throw new ConflictException('Email already in use');
+            }
+        }
+
+        try {
+            return await this.prisma.user.update({
+                where: { id: userId },
+                data,
+                select: {
+                    id: true,
+                    username: true,
+                    email: true,
+                    avatarUrl: true,
+                },
+            });
+        } catch {
+            throw new NotFoundException('User not found');
+        }
     }
 
     private async buildAuthResponse(user: {

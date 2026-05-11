@@ -2,6 +2,9 @@ import { LuBell, LuSettings } from 'react-icons/lu';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 import { Avatar, HStack, Icon, IconButton, Tabs } from '@chakra-ui/react';
 
+import { useGetCurrentUserQuery } from 'shared/api';
+import { getUserInfo } from 'shared/lib';
+import { UserProfileDialog } from 'widgets/userProfileDialog';
 import { UserSettingsMenu } from 'widgets/userSettingsMenu';
 
 import { SearchBox } from './SearchBox';
@@ -12,6 +15,7 @@ export const Header = () => {
         spaceKey?: string;
     }>();
     const navigate = useNavigate();
+    const { data: currentUser } = useGetCurrentUserQuery();
 
     const onSpacesPage = !!useMatch('/:orgSlug/spaces');
 
@@ -27,6 +31,8 @@ export const Header = () => {
             navigate(`/${orgSlug}/${spaceKey ?? ''}`);
         }
     };
+
+    const user = currentUser ?? getUserInfo();
 
     return (
         <HStack
@@ -75,9 +81,27 @@ export const Header = () => {
                         </IconButton>
                     }
                 />
-                <Avatar.Root size="xs" shape="full">
-                    <Avatar.Fallback name="Дима Авдеев" />
-                </Avatar.Root>
+                <UserProfileDialog
+                    trigger={
+                        <IconButton
+                            aria-label="Редактировать профиль"
+                            variant="ghost"
+                            size="sm"
+                            p={0}
+                            minW="auto"
+                            borderRadius="full"
+                        >
+                            <Avatar.Root size="xs" shape="full">
+                                {user?.avatarUrl ? (
+                                    <Avatar.Image src={user.avatarUrl} />
+                                ) : null}
+                                <Avatar.Fallback
+                                    name={user?.username ?? 'Пользователь'}
+                                />
+                            </Avatar.Root>
+                        </IconButton>
+                    }
+                />
             </HStack>
         </HStack>
     );

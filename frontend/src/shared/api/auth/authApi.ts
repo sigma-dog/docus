@@ -2,6 +2,7 @@ import type { LoginBody, RegisterBody } from './types';
 import type { User } from '../../types';
 import { api } from '../api';
 import { apiMethods, tagTypes } from '../constants';
+import { setUserInfo } from '../../lib';
 
 const getUrl = () => 'auth';
 
@@ -31,6 +32,38 @@ export const authApi = api.injectEndpoints({
             }),
         }),
 
+        getCurrentUser: build.query<User, void>({
+            query: () => ({
+                url: `${getUrl()}/me`,
+                method: apiMethods.get,
+            }),
+            providesTags: [tagTypes.CurrentUser],
+        }),
+
+        updateCurrentUser: build.mutation<
+            User,
+            Pick<User, 'username' | 'email' | 'avatarUrl'>
+        >({
+            query: (body) => ({
+                url: `${getUrl()}/me`,
+                method: apiMethods.patch,
+                body,
+            }),
+            invalidatesTags: [tagTypes.CurrentUser],
+            async onQueryStarted(_body, { dispatch, queryFulfilled }) {
+                const { data } = await queryFulfilled;
+
+                setUserInfo(data);
+                dispatch(
+                    authApi.util.updateQueryData(
+                        'getCurrentUser',
+                        undefined,
+                        () => data
+                    )
+                );
+            },
+        }),
+
         logout: build.mutation<void, void>({
             queryFn: () => ({ data: undefined }), // Не делаем реального запроса
             invalidatesTags: [tagTypes.CurrentUser],
@@ -39,5 +72,10 @@ export const authApi = api.injectEndpoints({
     overrideExisting: false,
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation } =
-    authApi;
+export const {
+    useLoginMutation,
+    useRegisterMutation,
+    useGetCurrentUserQuery,
+    useUpdateCurrentUserMutation,
+    useLogoutMutation,
+} = authApi;
