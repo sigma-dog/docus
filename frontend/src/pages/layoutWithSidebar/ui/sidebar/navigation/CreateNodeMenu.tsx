@@ -18,6 +18,10 @@ export const CreateNodeMenu = ({
         return null;
     }
 
+    const stopEventPropagation = (event: { stopPropagation: () => void }) => {
+        event.stopPropagation();
+    };
+
     return (
         <Menu.Root>
             <Menu.Trigger asChild>
@@ -25,14 +29,19 @@ export const CreateNodeMenu = ({
                     aria-label="Создать внутри"
                     size="2xs"
                     variant="ghost"
-                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={stopEventPropagation}
+                    onClick={stopEventPropagation}
                 >
                     <LuPlus />
                 </IconButton>
             </Menu.Trigger>
             <Portal>
                 <Menu.Positioner>
-                    <Menu.Content minW="44">
+                    <Menu.Content
+                        minW="44"
+                        onPointerDown={stopEventPropagation}
+                        onClick={stopEventPropagation}
+                    >
                         <Menu.Item
                             value="page"
                             onClick={(e) => {

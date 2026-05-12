@@ -41,28 +41,45 @@ const proseStyles = {
 export const Pane: FC<{
     parts: Part[];
     label: string;
+    title: string;
     labelColor: string;
     headerBg: string;
-}> = ({ parts, label, labelColor, headerBg }) => (
+}> = ({ parts, label, title, labelColor, headerBg }) => (
     <Box overflow="hidden" display="flex" flexDirection="column" h="100%">
         <Box px={4} py={2} bg={headerBg} borderBottomWidth="1px" flexShrink={0}>
             <Text fontSize="sm" fontWeight="medium" color={labelColor}>
                 {label}
             </Text>
         </Box>
-        <Box flex="1" overflowY="auto" css={proseStyles} px={6} py={4}>
-            {parts.length === 0 && (
-                <Text color="fg.muted" fontSize="sm">
-                    Пусто
+        <Box flex="1" overflowY="auto" px={6} py={4}>
+            <Box mb={4} pb={4} borderBottomWidth="1px">
+                <Text
+                    fontSize="xs"
+                    color="fg.muted"
+                    textTransform="uppercase"
+                    letterSpacing="0.08em"
+                    mb={1}
+                >
+                    Заголовок
                 </Text>
-            )}
-            {parts.map((part, i) => (
-                <Box
-                    key={i}
-                    style={{ background: part.bg }}
-                    dangerouslySetInnerHTML={{ __html: part.html }}
-                />
-            ))}
+                <Text fontSize="xl" fontWeight="semibold">
+                    {title}
+                </Text>
+            </Box>
+            <Box css={proseStyles}>
+                {parts.length === 0 && (
+                    <Text color="fg.muted" fontSize="sm">
+                        Пусто
+                    </Text>
+                )}
+                {parts.map((part, i) => (
+                    <Box
+                        key={i}
+                        style={{ background: part.bg }}
+                        dangerouslySetInnerHTML={{ __html: part.html }}
+                    />
+                ))}
+            </Box>
         </Box>
     </Box>
 );

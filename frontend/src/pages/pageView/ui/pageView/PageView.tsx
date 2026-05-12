@@ -1,14 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-    Box,
-    Center,
-    Grid,
-    GridItem,
-    Spinner,
-    Stack,
-    Text,
-} from '@chakra-ui/react';
+import { Center, Grid, GridItem, Spinner, Stack, Text } from '@chakra-ui/react';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
@@ -203,13 +195,16 @@ export const PageView = () => {
     }
 
     const isCompact = userSettings?.editorWidth === 'COMPACT';
+    const contentWidth = isCompact ? '960px' : 'full';
+    const pageLayoutWidth =
+        isCompact && tocHeadings.length > 0 ? '1206px' : contentWidth;
 
     return (
         <Grid
             flex="1"
             templateColumns={{
                 base: '1fr',
-                xl: isShowingHistory ? 'minmax(0, 1fr) 320px' : '1fr',
+                xl: '1fr',
             }}
             h="100%"
             overflow="hidden"
@@ -228,37 +223,21 @@ export const PageView = () => {
                     />
 
                     <Grid
-                        w="full"
+                        w={pageLayoutWidth}
+                        maxW="full"
+                        mx="auto"
                         templateColumns={{
                             base: '1fr',
                             xl:
                                 tocHeadings.length > 0
-                                    ? '240px minmax(0, 1fr)'
+                                    ? 'minmax(0, 1fr) 240px'
                                     : '1fr',
                         }}
                         gap={6}
                         alignItems="start"
                     >
-                        {tocHeadings.length > 0 && (
-                            <GridItem
-                                display={{ base: 'none', xl: 'block' }}
-                                position="sticky"
-                                top="-30px"
-                                alignSelf="start"
-                            >
-                                <TableOfContents
-                                    headings={tocHeadings}
-                                    onSelect={handleTocSelect}
-                                />
-                            </GridItem>
-                        )}
-
                         <Center w="full">
-                            <Stack
-                                gap={2}
-                                alignItems="center"
-                                w={isCompact ? '960px' : 'full'}
-                            >
+                            <Stack gap={2} alignItems="center" w={contentWidth}>
                                 <Header
                                     canEdit={canEdit}
                                     editorWidth={
@@ -301,24 +280,32 @@ export const PageView = () => {
                                 )}
                             </Stack>
                         </Center>
+
+                        {tocHeadings.length > 0 && (
+                            <GridItem
+                                display={{ base: 'none', xl: 'block' }}
+                                position="sticky"
+                                top="-30px"
+                                alignSelf="start"
+                            >
+                                <TableOfContents
+                                    headings={tocHeadings}
+                                    onSelect={handleTocSelect}
+                                />
+                            </GridItem>
+                        )}
                     </Grid>
                 </Stack>
             </GridItem>
 
-            {isShowingHistory && (
-                <GridItem borderLeftWidth="1px" overflowY="auto" bg="bg">
-                    <Box px={4} py={3} borderBottomWidth="1px">
-                        <Text fontWeight="medium" fontSize="sm">
-                            История изменений
-                        </Text>
-                    </Box>
-                    <HistoryPanel
-                        orgSlug={orgSlug}
-                        spaceKey={spaceKey}
-                        page={page}
-                    />
-                </GridItem>
-            )}
+            <HistoryPanel
+                isOpen={isShowingHistory}
+                onClose={() => setIsShowingHistory(false)}
+                orgSlug={orgSlug}
+                spaceKey={spaceKey}
+                page={page}
+                canEdit={canEdit}
+            />
         </Grid>
     );
 };

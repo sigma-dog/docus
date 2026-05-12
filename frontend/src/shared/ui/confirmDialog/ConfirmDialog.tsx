@@ -20,6 +20,7 @@ export const ConfirmDialog = ({
     message = 'Вы уверены, что хотите выполнить это действие?',
     confirmText = 'Подтвердить',
     cancelText = 'Отмена',
+    isLoading = false,
 }: ConfirmDialogProps) => {
     return (
         <Dialog.Root
@@ -47,6 +48,7 @@ export const ConfirmDialog = ({
                                     variant="solid"
                                     colorPalette="red"
                                     onClick={onConfirm}
+                                    loading={isLoading}
                                 >
                                     {confirmText}
                                 </Button>

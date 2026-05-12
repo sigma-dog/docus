@@ -28,4 +28,10 @@ export class PageHistoryService {
             },
         });
     }
+
+    async findOne(historyEntryId: string) {
+        return this.prisma.pageHistory.findUnique({
+            where: { id: historyEntryId },
+        });
+    }
 }

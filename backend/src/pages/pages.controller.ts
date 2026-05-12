@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { type AuthUser } from '../common/types/auth.types';
 import { CreatePageDto } from './dto/create-page.dto';
 import { MovePageDto } from './dto/move-page.dto';
+import { RestorePageDto } from './dto/restore-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
 import { PageHistoryService } from './page-history.service';
 import { PagesService } from './pages.service';
@@ -88,6 +89,23 @@ export class PagesController {
         @Body() dto: MovePageDto
     ) {
         return this.pagesService.move(key, pageId, user.id, dto, orgSlug);
+    }
+
+    @Post(':pageId/restore')
+    restore(
+        @Param('orgSlug') orgSlug: string,
+        @Param('key') key: string,
+        @Param('pageId') pageId: string,
+        @CurrentUser() user: AuthUser,
+        @Body() dto: RestorePageDto
+    ) {
+        return this.pagesService.restore(
+            key,
+            pageId,
+            user.id,
+            dto.historyEntryId,
+            orgSlug
+        );
     }
 
     @Get(':pageId/history')

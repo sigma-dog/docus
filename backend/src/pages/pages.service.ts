@@ -111,17 +111,71 @@ export class PagesService {
         this.assertEditor(space, userId);
 
         const existing = await this.getPageOrThrow(pageId, space.id);
+        const shouldCreateHistorySnapshot =
+            (dto.title !== undefined && dto.title !== existing.title) ||
+            (dto.content !== undefined && dto.content !== existing.content);
 
-        await this.pageHistoryService.createSnapshot(
-            pageId,
-            userId,
-            existing.title,
-            existing.content ?? null
-        );
+        if (shouldCreateHistorySnapshot) {
+            await this.pageHistoryService.createSnapshot(
+                pageId,
+                userId,
+                existing.title,
+                existing.content ?? null
+            );
+        }
 
         return this.prisma.page.update({
             where: { id: pageId },
             data: dto,
+            include: {
+                author: {
+                    select: { id: true, username: true, avatarUrl: true },
+                },
+            },
+        });
+    }
+
+    async restore(
+        spaceKey: string,
+        pageId: string,
+        userId: string,
+        historyEntryId: string,
+        orgSlug?: string
+    ) {
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
+        this.assertEditor(space, userId);
+
+        const page = await this.getPageOrThrow(pageId, space.id);
+        const historyEntry = await this.pageHistoryService.findOne(historyEntryId);
+
+        if (!historyEntry || historyEntry.pageId !== page.id) {
+            throw new NotFoundException(
+                `Page history entry "${historyEntryId}" not found`
+            );
+        }
+
+        const shouldCreateHistorySnapshot =
+            historyEntry.title !== page.title ||
+            historyEntry.content !== page.content;
+
+        if (shouldCreateHistorySnapshot) {
+            await this.pageHistoryService.createSnapshot(
+                page.id,
+                userId,
+                page.title,
+                page.content ?? null
+            );
+        }
+
+        return this.prisma.page.update({
+            where: { id: page.id },
+            data: {
+                title: historyEntry.title,
+                content: historyEntry.content,
+            },
             include: {
                 author: {
                     select: { id: true, username: true, avatarUrl: true },

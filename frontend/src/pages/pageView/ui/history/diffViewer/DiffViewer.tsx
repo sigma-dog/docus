@@ -5,11 +5,18 @@ import { buildParts } from './utils';
 import { Pane } from '../Pane';
 
 type Props = {
+    oldTitle: string;
+    newTitle: string;
     oldHtml: string;
     newHtml: string;
 };
 
-export const DiffViewer: FC<Props> = ({ oldHtml, newHtml }) => {
+export const DiffViewer: FC<Props> = ({
+    oldTitle,
+    newTitle,
+    oldHtml,
+    newHtml,
+}) => {
     const oldParts = buildParts(oldHtml, newHtml, 'old');
     const newParts = buildParts(oldHtml, newHtml, 'new');
 
@@ -25,6 +32,7 @@ export const DiffViewer: FC<Props> = ({ oldHtml, newHtml }) => {
                 <Pane
                     parts={oldParts}
                     label="До изменения"
+                    title={oldTitle}
                     labelColor="red.700"
                     headerBg="red.50"
                 />
@@ -33,6 +41,7 @@ export const DiffViewer: FC<Props> = ({ oldHtml, newHtml }) => {
                 <Pane
                     parts={newParts}
                     label="После изменения"
+                    title={newTitle}
                     labelColor="green.700"
                     headerBg="green.50"
                 />

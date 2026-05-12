@@ -1,167 +1,146 @@
 import type { FC } from 'react';
 import { useState } from 'react';
-import { LuClock, LuUser } from 'react-icons/lu';
+import { Drawer, Portal, Spinner, Stack, Text } from '@chakra-ui/react';
+
 import {
-    Box,
-    Button,
-    Center,
-    Dialog,
-    HStack,
-    Spinner,
-    Stack,
-    Text,
-    Timeline,
-} from '@chakra-ui/react';
-
-import { useGetPageHistoryQuery } from 'shared/api';
+    useGetPageHistoryQuery,
+    useRestorePageVersionMutation,
+} from 'shared/api';
 import type { Page, PageHistoryEntry } from 'shared/types';
+import { toaster } from 'shared/ui/chakra/toaster';
+import { ConfirmDialog } from 'shared/ui/confirmDialog/ConfirmDialog';
 
-import { DiffViewer } from './diffViewer/DiffViewer';
-import { LastEdited } from '../lastEdited/LastEdited';
+import { DiffDialog } from './diffDialog/DiffDialog';
+import { HistoryList } from './HistoryList';
+import type { DiffTarget } from '../../lib/types';
 
 type Props = {
+    isOpen: boolean;
+    onClose: () => void;
     orgSlug: string;
     spaceKey: string;
     page: Page;
+    canEdit: boolean;
 };
 
-type DiffTarget = {
-    entry: PageHistoryEntry;
-    next: PageHistoryEntry | null;
-    currentContent: string | null;
-};
-
-function formatDate(iso: string) {
-    return new Intl.DateTimeFormat('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(new Date(iso));
-}
-
-export const HistoryPanel: FC<Props> = ({ orgSlug, spaceKey, page }) => {
+export const HistoryPanel: FC<Props> = ({
+    isOpen,
+    onClose,
+    orgSlug,
+    spaceKey,
+    page,
+    canEdit,
+}) => {
     const { data: history, isLoading } = useGetPageHistoryQuery({
         orgSlug,
         spaceKey,
         pageId: page.id,
     });
+    const [restorePageVersion, { isLoading: isRestoring }] =
+        useRestorePageVersionMutation();
 
     const [diffTarget, setDiffTarget] = useState<DiffTarget | null>(null);
+    const [restoreTarget, setRestoreTarget] = useState<PageHistoryEntry | null>(
+        null
+    );
 
-    if (isLoading) {
-        return (
-            <Center py={8}>
-                <Spinner />
-            </Center>
-        );
-    }
-
-    if (!history || history.length === 0) {
-        return (
-            <Center py={8}>
-                <Text color="fg.muted">История изменений пуста</Text>
-            </Center>
-        );
-    }
-
-    const openDiff = (entry: PageHistoryEntry, index: number) => {
-        // entry is the snapshot *before* this edit
-        // next snapshot (index - 1) is what it became, or current page content if it's the latest
-        const next = index > 0 ? history[index - 1] : null;
-        setDiffTarget({ entry, next, currentContent: page.content });
-    };
-
-    // The "new" content for the diff: next snapshot's content, or current page if newest
-    const getDiffNew = (target: DiffTarget): string => {
-        if (target.next) {
-            return target.next.content ?? '';
+    const handleRestoreConfirm = async () => {
+        if (!restoreTarget) {
+            return;
         }
-        return target.currentContent ?? '';
+
+        try {
+            await restorePageVersion({
+                orgSlug,
+                spaceKey,
+                pageId: page.id,
+                body: {
+                    historyEntryId: restoreTarget.id,
+                },
+            }).unwrap();
+
+            toaster.create({
+                type: 'success',
+                title: 'Версия восстановлена',
+                description: 'Страница успешно откатена к выбранной версии.',
+            });
+            setRestoreTarget(null);
+            setDiffTarget(null);
+        } catch {
+            toaster.create({
+                type: 'error',
+                title: 'Не удалось восстановить версию',
+                description: 'Попробуйте еще раз.',
+            });
+        }
     };
 
     return (
         <>
-            <Box px={6} py={4}>
-                <Timeline.Root>
-                    {history.map((entry, index) => (
-                        <Timeline.Item key={entry.id}>
-                            <Timeline.Connector>
-                                <Timeline.Separator />
-                                <Timeline.Indicator>
-                                    <LuClock size={12} />
-                                </Timeline.Indicator>
-                            </Timeline.Connector>
-                            <Timeline.Content pb={6}>
-                                <Stack gap={1}>
-                                    <Text fontSize="sm" fontWeight="medium">
-                                        {entry.title}
-                                    </Text>
-                                    <HStack gap={2} color="fg.muted">
-                                        <LuUser size={12} />
-                                        <Text fontSize="xs">
-                                            {entry.author.username}
-                                        </Text>
-                                        <Text fontSize="xs">·</Text>
-                                        <Text fontSize="xs">
-                                            {formatDate(entry.createdAt)}
-                                        </Text>
-                                    </HStack>
-                                    <Button
-                                        size="xs"
-                                        variant="ghost"
-                                        colorPalette="blue"
-                                        alignSelf="flex-start"
-                                        mt={1}
-                                        onClick={() => openDiff(entry, index)}
-                                    >
-                                        Посмотреть изменения
-                                    </Button>
-                                </Stack>
-                            </Timeline.Content>
-                        </Timeline.Item>
-                    ))}
-                </Timeline.Root>
-            </Box>
-
-            <Dialog.Root
-                open={diffTarget !== null}
-                onOpenChange={({ open }) => {
-                    if (!open) {
-                        setDiffTarget(null);
+            <Drawer.Root
+                lazyMount
+                open={isOpen}
+                placement="end"
+                size={{ base: 'full', lg: 'md' }}
+                onOpenChange={(details) => {
+                    if (!details.open) {
+                        onClose();
                     }
                 }}
-                size="cover"
             >
-                <Dialog.Backdrop />
-                <Dialog.Positioner>
-                    <Dialog.Content display="flex" flexDirection="column">
-                        <Dialog.Header
-                            borderBottomWidth="1px"
-                            alignItems="center"
-                            justifyContent="space-between"
-                        >
-                            <Dialog.Title>
-                                {diffTarget
-                                    ? `История: ${diffTarget.entry.title}`
-                                    : ''}
-                            </Dialog.Title>
+                <Portal>
+                    <Drawer.Backdrop />
+                    <Drawer.Positioner>
+                        <Drawer.Content>
+                            <Drawer.Header>
+                                <Drawer.Title>История изменений</Drawer.Title>
+                            </Drawer.Header>
 
-                            <LastEdited page={page} />
-                            <Dialog.CloseTrigger />
-                        </Dialog.Header>
-                        <Dialog.Body flex="1" overflow="hidden" p={4}>
-                            {diffTarget && (
-                                <DiffViewer
-                                    oldHtml={diffTarget.entry.content ?? ''}
-                                    newHtml={getDiffNew(diffTarget)}
-                                />
-                            )}
-                        </Dialog.Body>
-                    </Dialog.Content>
-                </Dialog.Positioner>
-            </Dialog.Root>
+                            <Drawer.Body px={0}>
+                                {isLoading ? (
+                                    <Stack py={10} align="center">
+                                        <Spinner size="sm" />
+                                        <Text color="fg.muted">
+                                            Загружаем историю страницы...
+                                        </Text>
+                                    </Stack>
+                                ) : history ? (
+                                    <HistoryList
+                                        setDiffTarget={setDiffTarget}
+                                        history={history}
+                                        page={page}
+                                        canEdit={canEdit}
+                                        setRestoreTarget={setRestoreTarget}
+                                    />
+                                ) : null}
+                            </Drawer.Body>
+
+                            <Drawer.CloseTrigger />
+                        </Drawer.Content>
+                    </Drawer.Positioner>
+                </Portal>
+            </Drawer.Root>
+
+            <DiffDialog
+                diffTarget={diffTarget}
+                setDiffTarget={setDiffTarget}
+                page={page}
+            />
+
+            <ConfirmDialog
+                isOpen={restoreTarget !== null}
+                onClose={() => {
+                    if (!isRestoring) {
+                        setRestoreTarget(null);
+                    }
+                }}
+                onConfirm={handleRestoreConfirm}
+                title="Откатить страницу к этой версии?"
+                message="Будут восстановлены заголовок и содержимое страницы. Это действие создаст новую запись в истории."
+                confirmText="Откатить"
+                cancelText="Отмена"
+                isLoading={isRestoring}
+            />
         </>
     );
 };

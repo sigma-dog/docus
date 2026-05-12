@@ -51,6 +51,10 @@ export const NodeContextMenu: FC<Props> = ({
         return null;
     }
 
+    const stopEventPropagation = (event: { stopPropagation: () => void }) => {
+        event.stopPropagation();
+    };
+
     const handleRenameOpen = () => {
         setTitle(nodeTitle);
         setRenameOpen(true);
@@ -141,7 +145,8 @@ export const NodeContextMenu: FC<Props> = ({
                             aria-label="Действия"
                             size="2xs"
                             variant="ghost"
-                            onClick={(e) => e.stopPropagation()}
+                            onPointerDown={stopEventPropagation}
+                            onClick={stopEventPropagation}
                         >
                             <LuEllipsis />
                         </IconButton>
@@ -150,7 +155,8 @@ export const NodeContextMenu: FC<Props> = ({
                         <Menu.Positioner>
                             <Menu.Content
                                 minW="44"
-                                onClick={(e) => e.stopPropagation()}
+                                onPointerDown={stopEventPropagation}
+                                onClick={stopEventPropagation}
                             >
                                 <Menu.Item value="icon">
                                     <LuSmile />

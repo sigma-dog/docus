@@ -15,6 +15,10 @@ export const SpaceNavigationItem: FC<SpaceNavigationItemProps> = ({
     page,
     onClick,
 }) => {
+    const stopEventPropagation = (event: { stopPropagation: () => void }) => {
+        event.stopPropagation();
+    };
+
     return (
         <HStack
             bg="white"
@@ -40,12 +44,17 @@ export const SpaceNavigationItem: FC<SpaceNavigationItemProps> = ({
                     {page.title}
                 </Text>
             </HStack>
-            <NodeContextMenu
-                nodeId={page.id}
-                nodeTitle={page.title}
-                nodeIcon={page.icon}
-                isFolder={page.isFolder}
-            />
+            <Box
+                onPointerDown={stopEventPropagation}
+                onClick={stopEventPropagation}
+            >
+                <NodeContextMenu
+                    nodeId={page.id}
+                    nodeTitle={page.title}
+                    nodeIcon={page.icon}
+                    isFolder={page.isFolder}
+                />
+            </Box>
         </HStack>
     );
 };

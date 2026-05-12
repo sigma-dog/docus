@@ -67,12 +67,6 @@ export const Navigation = ({ onCreatePage, onCreateFolder }: Props) => {
             collection={collection}
             expandedValue={expandedValue}
             onExpandedChange={onExpandedChange}
-            onSelectionChange={({ selectedNodes }) => {
-                const node = selectedNodes[0];
-                if (node && !node.isFolder && orgSlug && spaceKey) {
-                    navigate(`/${orgSlug}/${spaceKey}/pages/${node.id}`);
-                }
-            }}
         >
             <TreeView.Label>Навигация</TreeView.Label>
             <TreeView.Tree>
@@ -90,6 +84,13 @@ export const Navigation = ({ onCreatePage, onCreateFolder }: Props) => {
                                 onCreatePage={onCreatePage}
                                 onCreateFolder={onCreateFolder}
                                 node={node}
+                                onOpenPage={(pageId) => {
+                                    if (orgSlug && spaceKey) {
+                                        navigate(
+                                            `/${orgSlug}/${spaceKey}/pages/${pageId}`
+                                        );
+                                    }
+                                }}
                             />
                         )
                     }

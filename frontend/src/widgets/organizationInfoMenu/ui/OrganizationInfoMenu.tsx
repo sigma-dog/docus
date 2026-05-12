@@ -18,9 +18,9 @@ import {
     useGetOrganizationQuery,
     useRemoveOrganizationAvatarMutation,
     useRemoveOrgMemberMutation,
-    useUploadOrganizationAvatarMutation,
     useUpdateOrganizationMutation,
     useUpdateOrgMemberRoleMutation,
+    useUploadOrganizationAvatarMutation,
 } from 'shared/api';
 import { getUserInfo } from 'shared/lib/userUtils';
 import type { Organization, OrgMember } from 'shared/types';

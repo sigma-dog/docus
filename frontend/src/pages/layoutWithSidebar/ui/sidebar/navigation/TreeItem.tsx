@@ -11,12 +11,14 @@ type TreeItemProps = {
     onCreatePage?: (parentId?: string) => void;
     onCreateFolder?: (parentId?: string) => void;
     node: PageSummary;
+    onOpenPage: (pageId: string) => void;
 };
 
 export const TreeItem: FC<TreeItemProps> = ({
     onCreatePage,
     onCreateFolder,
     node,
+    onOpenPage,
 }) => {
     return (
         <TreeView.Item
@@ -24,6 +26,7 @@ export const TreeItem: FC<TreeItemProps> = ({
             alignItems="center"
             role="group"
             pr={1}
+            onClick={() => onOpenPage(node.id)}
         >
             <LuDot />
             {node.icon ? (

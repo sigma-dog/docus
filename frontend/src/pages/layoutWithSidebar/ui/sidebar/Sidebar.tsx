@@ -65,7 +65,7 @@ export const Sidebar = () => {
                 justify="space-between"
                 flex="1"
                 overflow="hidden"
-                bg="bg.subtle"
+                bg="bg.panel"
                 p={4}
             >
                 <Stack gap={5} alignItems="stretch">
