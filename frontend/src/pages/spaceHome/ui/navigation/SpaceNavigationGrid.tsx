@@ -15,7 +15,7 @@ export const SpaceNavigationGrid: FC<SpaceNavigationGridProps> = ({
     onPageClick,
 }) => {
     return (
-        <Grid templateColumns="repeat(4, 250px)" gap={2}>
+        <Grid templateColumns="repeat(4, 350px)" gap={2}>
             {pages.map((page) => (
                 <SpaceNavigationItem
                     key={page.id}
