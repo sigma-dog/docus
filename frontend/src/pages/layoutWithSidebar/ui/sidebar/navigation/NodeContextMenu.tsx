@@ -13,10 +13,14 @@ import {
     Portal,
     Stack,
 } from '@chakra-ui/react';
+// import { EmojiPicker } from 'shared/ui';
+import EmojiPicker, {
+    type EmojiClickData,
+    EmojiStyle,
+} from 'emoji-picker-react';
 
 import { useDeletePageMutation, useUpdatePageMutation } from 'shared/api';
 import { useCurrentSpacePermissions } from 'shared/lib';
-import { EmojiPicker } from 'shared/ui';
 import { ConfirmDialog } from 'shared/ui/confirmDialog/ConfirmDialog';
 
 type Props = {
@@ -86,7 +90,7 @@ export const NodeContextMenu: FC<Props> = ({
         setDeleteOpen(false);
     };
 
-    const handleEmojiSelect = async (emoji: string) => {
+    const handleEmojiSelect = async ({ emoji }: EmojiClickData) => {
         if (!orgSlug || !spaceKey) {
             return;
         }
@@ -190,7 +194,13 @@ export const NodeContextMenu: FC<Props> = ({
                     <Portal>
                         <Popover.Positioner>
                             <Popover.Content p={0} w="auto">
-                                <EmojiPicker onSelect={handleEmojiSelect} />
+                                <EmojiPicker
+                                    emojiStyle={EmojiStyle.NATIVE}
+                                    onEmojiClick={handleEmojiSelect}
+                                    previewConfig={{
+                                        showPreview: false,
+                                    }}
+                                />
                             </Popover.Content>
                         </Popover.Positioner>
                     </Portal>
