@@ -60,7 +60,7 @@ const Onboarding = () => {
 
                 <Flex direction="column" gap={1} alignItems="center">
                     <Text fontWeight="semibold" fontSize="xl">
-                        Добро пожаловать в Docus
+                        Добро пожаловать!
                     </Text>
                     <Text color="fg.muted" fontSize="sm" textAlign="center">
                         Создайте организацию или присоединитесь по инвайту
@@ -75,19 +75,34 @@ const Onboarding = () => {
                     w="full"
                     variant="line"
                 >
-                    <Tabs.List w="full">
-                        <Tabs.Trigger value="create" flex={1}>
+                    <Tabs.List
+                        w="full"
+                        display="grid"
+                        gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+                        alignItems="stretch"
+                    >
+                        <Tabs.Trigger
+                            value="create"
+                            justifyContent="center"
+                            textAlign="center"
+                            px={4}
+                        >
                             Создать организацию
                         </Tabs.Trigger>
-                        <Tabs.Trigger value="join" flex={1}>
+                        <Tabs.Trigger
+                            value="join"
+                            justifyContent="center"
+                            textAlign="center"
+                            px={4}
+                        >
                             Войти по инвайту
                         </Tabs.Trigger>
                     </Tabs.List>
 
-                    <Tabs.Content value="create" pt={4}>
+                    <Tabs.Content value="create" pt={4} w="full">
                         <CreateOrgForm />
                     </Tabs.Content>
-                    <Tabs.Content value="join" pt={4}>
+                    <Tabs.Content value="join" pt={4} w="full">
                         <JoinOrgForm />
                     </Tabs.Content>
                 </Tabs.Root>

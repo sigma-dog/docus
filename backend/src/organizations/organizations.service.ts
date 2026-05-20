@@ -99,11 +99,7 @@ export class OrganizationsService {
         });
     }
 
-    async updateAvatar(
-        slug: string,
-        userId: string,
-        file: UploadedImageFile
-    ) {
+    async updateAvatar(slug: string, userId: string, file: UploadedImageFile) {
         if (!file) {
             throw new BadRequestException('Файл не предоставлен');
         }

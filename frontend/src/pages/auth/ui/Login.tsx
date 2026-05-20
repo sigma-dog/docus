@@ -56,7 +56,7 @@ export const Login = () => {
                 <Field.Root invalid={!!errors.email}>
                     <Field.Label>Email</Field.Label>
                     <Input
-                        placeholder="example@geospotter.com"
+                        placeholder="example@mail.com"
                         variant="subtle"
                         size="md"
                         type="email"

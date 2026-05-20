@@ -355,16 +355,16 @@ export const OrganizationInfoMenu: FC<OrganizationInfoMenuProps> = ({
                 <Portal>
                     <Drawer.Backdrop />
                     <Drawer.Positioner>
-                        <Drawer.Content>
-                            <Drawer.Header>
-                                <Drawer.Title>
+                        <Drawer.Content pt={6}>
+                            {/* <Drawer.Header>
+                                {/* <Drawer.Title>
                                     <Text lineClamp={1} w="full">
                                         Организация{' '}
                                         {organizationDetails?.name ??
                                             organization.name}
                                     </Text>
-                                </Drawer.Title>
-                            </Drawer.Header>
+                                </Drawer.Title> */}
+                            {/* </Drawer.Header> */}
 
                             <Drawer.Body pb={6}>
                                 {isFetching && !organizationDetails ? (

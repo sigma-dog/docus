@@ -126,11 +126,6 @@ export class SpacesController {
         @CurrentUser() user: AuthUser,
         @Body() dto: UpdateSpaceMemberDto
     ) {
-        return this.spacesService.updateMember(
-            key,
-            user.id,
-            targetUserId,
-            dto
-        );
+        return this.spacesService.updateMember(key, user.id, targetUserId, dto);
     }
 }

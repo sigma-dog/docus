@@ -1,1 +1,2 @@
 export const MAX_AVATAR_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+export const MAX_PAGE_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;

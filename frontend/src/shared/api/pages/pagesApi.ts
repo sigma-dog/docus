@@ -26,6 +26,10 @@ type RestorePageBody = {
     historyEntryId: string;
 };
 
+type UploadPageImageResponse = {
+    url: string;
+};
+
 const getUrl = (orgSlug: string, spaceKey: string) =>
     `organizations/${orgSlug}/spaces/${spaceKey}/pages`;
 
@@ -89,6 +93,28 @@ export const pagesApi = api.injectEndpoints({
                 { type: tagTypes.Pages, id: pageId },
                 { type: tagTypes.Pages, id: `history:${pageId}` },
             ],
+        }),
+
+        uploadPageImage: build.mutation<
+            UploadPageImageResponse,
+            {
+                orgSlug: string;
+                spaceKey: string;
+                pageId: string;
+                file: File;
+            }
+        >({
+            query: ({ orgSlug, spaceKey, pageId, file }) => {
+                const formData = new FormData();
+
+                formData.append('file', file);
+
+                return {
+                    url: `${getUrl(orgSlug, spaceKey)}/${pageId}/images`,
+                    method: apiMethods.post,
+                    body: formData,
+                };
+            },
         }),
 
         deletePage: build.mutation<
@@ -167,6 +193,7 @@ export const {
     useGetPageQuery,
     useCreatePageMutation,
     useUpdatePageMutation,
+    useUploadPageImageMutation,
     useDeletePageMutation,
     useMovePageMutation,
     useRestorePageVersionMutation,

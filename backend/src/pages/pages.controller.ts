@@ -8,9 +8,13 @@ import {
     Param,
     Patch,
     Post,
+    UploadedFile,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
+import type { UploadedImageFile } from '../S3/types/uploaded-image-file.type';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { type AuthUser } from '../common/types/auth.types';
@@ -67,6 +71,26 @@ export class PagesController {
         @Body() dto: UpdatePageDto
     ) {
         return this.pagesService.update(key, pageId, user.id, dto, orgSlug);
+    }
+
+    @Post(':pageId/images')
+    @UseInterceptors(
+        FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } })
+    )
+    uploadImage(
+        @Param('orgSlug') orgSlug: string,
+        @Param('key') key: string,
+        @Param('pageId') pageId: string,
+        @CurrentUser() user: AuthUser,
+        @UploadedFile() file: UploadedImageFile
+    ) {
+        return this.pagesService.uploadImage(
+            key,
+            pageId,
+            user.id,
+            file,
+            orgSlug
+        );
     }
 
     @Delete(':pageId')

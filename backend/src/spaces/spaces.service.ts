@@ -341,7 +341,9 @@ export class SpacesService {
             }
 
             if (member) {
-                await this.prisma.spaceMember.delete({ where: { id: member.id } });
+                await this.prisma.spaceMember.delete({
+                    where: { id: member.id },
+                });
             }
 
             return;
@@ -431,7 +433,9 @@ export class SpacesService {
             space.ownerId === userId ||
             space.organization.ownerId === userId ||
             space.members.some((member) => member.userId === userId) ||
-            space.organization.members.some((member) => member.userId === userId);
+            space.organization.members.some(
+                (member) => member.userId === userId
+            );
 
         if (!access) {
             throw new ForbiddenException('Access denied');
@@ -481,7 +485,9 @@ function buildSpaceAccessMembers(space: SpaceWithAccessContext) {
             .map((member) => member.userId),
     ]);
 
-    const explicitSpaceMembers = new Map(space.members.map((member) => [member.userId, member]));
+    const explicitSpaceMembers = new Map(
+        space.members.map((member) => [member.userId, member])
+    );
     const accessMembers = new Map<
         string,
         {
@@ -539,11 +545,12 @@ function buildSpaceAccessMembers(space: SpaceWithAccessContext) {
         });
     }
 
-    const ownerOrgRole = space.organization.ownerId === space.ownerId
-        ? 'OWNER'
-        : space.organization.members.find(
-              (member) => member.userId === space.ownerId
-          )?.role;
+    const ownerOrgRole =
+        space.organization.ownerId === space.ownerId
+            ? 'OWNER'
+            : space.organization.members.find(
+                  (member) => member.userId === space.ownerId
+              )?.role;
 
     accessMembers.set(space.ownerId, {
         userId: space.ownerId,

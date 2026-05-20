@@ -98,18 +98,14 @@ export const SpaceProfileSection: FC<SpaceProfileSectionProps> = ({
                     <Dialog.Positioner>
                         <Dialog.Content>
                             <Dialog.Header>
-                                <Dialog.Title>
-                                    Аватар пространства
-                                </Dialog.Title>
+                                <Dialog.Title>Аватар пространства</Dialog.Title>
                             </Dialog.Header>
                             <Dialog.Body>
                                 <Stack gap={4}>
                                     <Stack align="center" gap={3}>
                                         <Avatar.Root size="2xl" shape="rounded">
                                             {avatarUrl ? (
-                                                <Avatar.Image
-                                                    src={avatarUrl}
-                                                />
+                                                <Avatar.Image src={avatarUrl} />
                                             ) : null}
                                             <Avatar.Fallback name={name} />
                                         </Avatar.Root>
@@ -164,9 +160,7 @@ export const SpaceProfileSection: FC<SpaceProfileSectionProps> = ({
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={
-                                                            onAvatarRemove
-                                                        }
+                                                        onClick={onAvatarRemove}
                                                         disabled={
                                                             !avatarUrl ||
                                                             isUpdatingAvatar

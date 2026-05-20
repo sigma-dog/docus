@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LuImage, LuLink, LuUpload } from 'react-icons/lu';
+import { useParams } from 'react-router-dom';
 import {
     Box,
     Button,
@@ -11,17 +12,96 @@ import {
     Tabs,
 } from '@chakra-ui/react';
 
+import { useUploadPageImageMutation } from 'shared/api';
+import { toaster } from 'shared/ui/chakra/toaster';
+
 import { Control } from '../rich-text-editor';
 import { useRichTextEditorContext } from '../rich-text-editor-context';
+
+const ACCEPTED_IMAGE_TYPES: Record<string, string[]> = {
+    'image/jpeg': ['.jpg', '.jpeg'],
+    'image/png': ['.png'],
+    'image/webp': ['.webp'],
+    'image/gif': ['.gif'],
+    'image/avif': ['.avif'],
+};
 
 export const InsertImageControl = () => {
     const { editor } = useRichTextEditorContext();
     const [open, setOpen] = useState(false);
+    const [imageUrl, setImageUrl] = useState('');
     const [files, setFiles] = useState<File[]>([]);
+    const { orgSlug, spaceKey, pageId } = useParams<{
+        orgSlug: string;
+        spaceKey: string;
+        pageId: string;
+    }>();
+    const [uploadPageImage, { isLoading: isUploading }] =
+        useUploadPageImageMutation();
 
     if (!editor) {
         return null;
     }
+
+    const isUploadAvailable = Boolean(orgSlug && spaceKey && pageId);
+    const resetDialogState = () => {
+        setImageUrl('');
+        setFiles([]);
+    };
+
+    const handleUrlInsert = () => {
+        const trimmedUrl = imageUrl.trim();
+
+        if (!trimmedUrl) {
+            return;
+        }
+
+        editor.chain().focus().setImage({ src: trimmedUrl }).run();
+        setImageUrl('');
+        setFiles([]);
+        setOpen(false);
+    };
+
+    const handleFileUpload = async (details: { acceptedFiles: File[] }) => {
+        const nextFile = details.acceptedFiles[0] ?? null;
+
+        setFiles(nextFile ? [nextFile] : []);
+
+        if (!nextFile || !orgSlug || !spaceKey || !pageId) {
+            return;
+        }
+
+        try {
+            const { url } = await uploadPageImage({
+                orgSlug,
+                spaceKey,
+                pageId,
+                file: nextFile,
+            }).unwrap();
+
+            editor.chain().focus().setImage({ src: url }).run();
+            setFiles([]);
+            setOpen(false);
+            toaster.create({
+                type: 'success',
+                title: 'Изображение загружено',
+            });
+        } catch {
+            toaster.create({
+                type: 'error',
+                title: 'Ошибка загрузки',
+                description: 'Не удалось загрузить изображение в S3',
+            });
+        }
+    };
+
+    const handleFileReject = () => {
+        toaster.create({
+            type: 'error',
+            title: 'Неподходящий файл',
+            description: 'Поддерживаются JPG, PNG, WEBP, GIF и AVIF до 5 МБ',
+        });
+    };
 
     return (
         <>
@@ -32,7 +112,16 @@ export const InsertImageControl = () => {
                 variant="ghost"
             />
 
-            <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
+            <Dialog.Root
+                open={open}
+                onOpenChange={(e) => {
+                    setOpen(e.open);
+
+                    if (!e.open) {
+                        resetDialogState();
+                    }
+                }}
+            >
                 <Portal>
                     <Dialog.Backdrop />
                     <Dialog.Positioner>
@@ -47,7 +136,13 @@ export const InsertImageControl = () => {
                                         <Tabs.Trigger value="url">
                                             <LuLink /> Embed URL
                                         </Tabs.Trigger>
-                                        <Tabs.Trigger disabled value="upload">
+                                        <Tabs.Trigger
+                                            value="upload"
+                                            disabled={
+                                                !isUploadAvailable ||
+                                                isUploading
+                                            }
+                                        >
                                             <LuUpload /> Upload File
                                         </Tabs.Trigger>
                                     </Tabs.List>
@@ -56,27 +151,20 @@ export const InsertImageControl = () => {
                                         <Box display="flex" gap="2" mt="4">
                                             <Input
                                                 placeholder="Enter image URL"
-                                                id="image-url-input"
-                                            />
-                                            <Button
-                                                onClick={() => {
-                                                    const url = (
-                                                        document.getElementById(
-                                                            'image-url-input'
-                                                        ) as HTMLInputElement
-                                                    ).value;
-                                                    if (url) {
-                                                        editor
-                                                            .chain()
-                                                            .focus()
-                                                            .setImage({
-                                                                src: url,
-                                                            })
-                                                            .run();
+                                                value={imageUrl}
+                                                onChange={(event) =>
+                                                    setImageUrl(
+                                                        event.target.value
+                                                    )
+                                                }
+                                                onKeyDown={(event) => {
+                                                    if (event.key === 'Enter') {
+                                                        event.preventDefault();
+                                                        handleUrlInsert();
                                                     }
-                                                    setOpen(false);
                                                 }}
-                                            >
+                                            />
+                                            <Button onClick={handleUrlInsert}>
                                                 Insert
                                             </Button>
                                         </Box>
@@ -87,25 +175,10 @@ export const InsertImageControl = () => {
                                             maxW="xl"
                                             alignItems="stretch"
                                             maxFiles={1}
-                                            accept="image/*"
-                                            onFileAccept={(accepted) => {
-                                                const uploaded =
-                                                    accepted.files ?? [];
-                                                setFiles(uploaded);
-
-                                                if (uploaded[0]) {
-                                                    const url =
-                                                        URL.createObjectURL(
-                                                            uploaded[0]
-                                                        );
-                                                    editor
-                                                        .chain()
-                                                        .focus()
-                                                        .setImage({ src: url })
-                                                        .run();
-                                                    setOpen(false);
-                                                }
-                                            }}
+                                            accept={ACCEPTED_IMAGE_TYPES}
+                                            maxFileSize={5 * 1024 * 1024}
+                                            onFileChange={handleFileUpload}
+                                            onFileReject={handleFileReject}
                                         >
                                             <FileUpload.HiddenInput />
                                             <FileUpload.Dropzone>
@@ -117,17 +190,26 @@ export const InsertImageControl = () => {
                                                 </Icon>
                                                 <FileUpload.DropzoneContent>
                                                     <Box>
-                                                        Drag and drop a file
-                                                        here
+                                                        Перетяните файл сюда
                                                     </Box>
                                                     <Box color="fg.muted">
-                                                        .png, .jpg up to 5MB
+                                                        Или нажмите, чтобы
+                                                        выбрать с устройства
                                                     </Box>
                                                 </FileUpload.DropzoneContent>
                                             </FileUpload.Dropzone>
 
-                                            <FileUpload.List files={files} />
+                                            <FileUpload.List
+                                                files={files}
+                                                clearable
+                                            />
                                         </FileUpload.Root>
+                                        {!isUploadAvailable && (
+                                            <Box mt="3" color="fg.muted">
+                                                Upload is available only inside
+                                                a saved page.
+                                            </Box>
+                                        )}
                                     </Tabs.Content>
                                 </Tabs.Root>
                             </Dialog.Body>
@@ -135,7 +217,11 @@ export const InsertImageControl = () => {
                             <Dialog.Footer mt="4">
                                 <Button
                                     variant="outline"
-                                    onClick={() => setOpen(false)}
+                                    onClick={() => {
+                                        resetDialogState();
+                                        setOpen(false);
+                                    }}
+                                    disabled={isUploading}
                                 >
                                     Cancel
                                 </Button>

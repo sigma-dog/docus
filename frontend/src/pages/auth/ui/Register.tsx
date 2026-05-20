@@ -10,7 +10,6 @@ type RegisterFormValues = {
     username: string;
     email: string;
     password: string;
-    birthDate: string;
 };
 
 export const Register = () => {
@@ -27,12 +26,7 @@ export const Register = () => {
 
     const onSubmit = async (data: RegisterFormValues) => {
         try {
-            const formattedBirthdate = new Date(data.birthDate).toISOString();
-
-            const userData = await registerUser({
-                ...data,
-                birthDate: formattedBirthdate,
-            }).unwrap();
+            const userData = await registerUser(data).unwrap();
 
             removeLastVisited();
             setUserInfo(userData);
@@ -57,7 +51,7 @@ export const Register = () => {
                 <Field.Root invalid={!!errors.username}>
                     <Field.Label>Ваше имя</Field.Label>
                     <Input
-                        placeholder="Амир Зиннатуллин"
+                        placeholder="Иван Иванов"
                         variant="subtle"
                         size="md"
                         {...register('username', {
@@ -76,7 +70,7 @@ export const Register = () => {
                 <Field.Root invalid={!!errors.email}>
                     <Field.Label>Email</Field.Label>
                     <Input
-                        placeholder="example@geospotter.com"
+                        placeholder="example@mail.com"
                         variant="subtle"
                         size="md"
                         type="email"
@@ -108,22 +102,6 @@ export const Register = () => {
                     />
                     <Field.ErrorText>
                         {errors.password?.message}
-                    </Field.ErrorText>
-                </Field.Root>
-
-                <Field.Root invalid={!!errors.birthDate}>
-                    <Field.Label>Введите вашу дату рождения</Field.Label>
-                    <Input
-                        placeholder="Дата рождения"
-                        variant="subtle"
-                        size="md"
-                        type="date"
-                        {...register('birthDate', {
-                            required: 'Дата рождения обязательна',
-                        })}
-                    />
-                    <Field.ErrorText>
-                        {errors.birthDate?.message}
                     </Field.ErrorText>
                 </Field.Root>
             </Flex>

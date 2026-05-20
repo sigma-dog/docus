@@ -16,9 +16,9 @@ import {
     useGetSpaceQuery,
     useRemoveSpaceAvatarMutation,
     useRemoveSpaceMemberMutation,
-    useUploadSpaceAvatarMutation,
     useUpdateSpaceMemberMutation,
     useUpdateSpaceMutation,
+    useUploadSpaceAvatarMutation,
 } from 'shared/api';
 import { getUserInfo } from 'shared/lib/userUtils';
 import type { Space } from 'shared/types';
@@ -305,16 +305,7 @@ export const SpaceInfoMenu: FC<SpaceInfoMenuProps> = ({
                 <Drawer.Backdrop />
                 <Drawer.Positioner>
                     <Drawer.Content>
-                        <Drawer.Header>
-                            <Drawer.Title>
-                                <Text lineClamp={1} w="full">
-                                    Пространство{' '}
-                                    {spaceDetails?.name ?? space.name}
-                                </Text>
-                            </Drawer.Title>
-                        </Drawer.Header>
-
-                        <Drawer.Body pb={6}>
+                        <Drawer.Body py={6}>
                             {isFetching && !spaceDetails ? (
                                 <Stack py={10} align="center">
                                     <Spinner size="sm" />

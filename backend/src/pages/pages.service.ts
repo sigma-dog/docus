@@ -1,10 +1,16 @@
+import { extname } from 'node:path';
+
 import {
+    BadRequestException,
     ForbiddenException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
 
+import type { UploadedImageFile } from '../S3/types/uploaded-image-file.type';
+import { MAX_PAGE_IMAGE_SIZE_BYTES } from '../common/constants/files.constants';
 import { PrismaService } from '../prisma/prisma.service';
+import { S3Service } from '../S3/S3.service';
 import { SpacesService } from '../spaces/spaces.service';
 import { CreatePageDto } from './dto/create-page.dto';
 import { MovePageDto } from './dto/move-page.dto';
@@ -16,7 +22,8 @@ export class PagesService {
     constructor(
         private prisma: PrismaService,
         private spacesService: SpacesService,
-        private pageHistoryService: PageHistoryService
+        private pageHistoryService: PageHistoryService,
+        private readonly s3Service: S3Service
     ) {}
 
     async create(
@@ -135,6 +142,55 @@ export class PagesService {
         });
     }
 
+    async uploadImage(
+        spaceKey: string,
+        pageId: string,
+        userId: string,
+        file: UploadedImageFile,
+        orgSlug?: string
+    ) {
+        if (!file) {
+            throw new BadRequestException('Файл не предоставлен');
+        }
+
+        if (!file.mimetype.startsWith('image/')) {
+            throw new BadRequestException('Можно загружать только изображения');
+        }
+
+        if (file.size > MAX_PAGE_IMAGE_SIZE_BYTES) {
+            throw new BadRequestException(
+                'Размер файла не должен превышать 5MB'
+            );
+        }
+
+        const space = await this.spacesService.getSpaceOrThrow(
+            spaceKey,
+            orgSlug
+        );
+        this.assertEditor(space, userId);
+
+        const page = await this.getPageOrThrow(pageId, space.id);
+        const fileExtension = getImageExtension(file);
+        const fileKey = [
+            'organizations',
+            space.organizationId,
+            'spaces',
+            space.id,
+            'pages',
+            page.id,
+            'images',
+            `${Date.now()}-${Math.random().toString(36).slice(2)}${fileExtension}`,
+        ].join('/');
+
+        const url = await this.s3Service.uploadFile({
+            fileKey,
+            buffer: file.buffer,
+            contentType: file.mimetype,
+        });
+
+        return { url };
+    }
+
     async restore(
         spaceKey: string,
         pageId: string,
@@ -149,7 +205,8 @@ export class PagesService {
         this.assertEditor(space, userId);
 
         const page = await this.getPageOrThrow(pageId, space.id);
-        const historyEntry = await this.pageHistoryService.findOne(historyEntryId);
+        const historyEntry =
+            await this.pageHistoryService.findOne(historyEntryId);
 
         if (!historyEntry || historyEntry.pageId !== page.id) {
             throw new NotFoundException(
@@ -299,6 +356,28 @@ export class PagesService {
 
         throw new ForbiddenException('Insufficient permissions');
     }
+}
+
+const IMAGE_EXTENSION_BY_MIME_TYPE: Record<string, string> = {
+    'image/apng': '.apng',
+    'image/avif': '.avif',
+    'image/gif': '.gif',
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/svg+xml': '.svg',
+    'image/webp': '.webp',
+};
+
+function getImageExtension(file: UploadedImageFile) {
+    const extensionFromMimeType = IMAGE_EXTENSION_BY_MIME_TYPE[file.mimetype];
+
+    if (extensionFromMimeType) {
+        return extensionFromMimeType;
+    }
+
+    const extensionFromName = extname(file.originalname).toLowerCase();
+
+    return extensionFromName || '';
 }
 
 // ─── Tree builder ─────────────────────────────────────────────────────────────

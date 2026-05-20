@@ -74,9 +74,7 @@ export const OrgSelect: FC<OrgSelectProps> = ({ selectedSlug }) => {
                         <HStack gap={2}>
                             <Avatar.Root size="md" shape="rounded">
                                 {selectedOrg?.avatarUrl ? (
-                                    <Avatar.Image
-                                        src={selectedOrg.avatarUrl}
-                                    />
+                                    <Avatar.Image src={selectedOrg.avatarUrl} />
                                 ) : null}
                                 <Avatar.Fallback
                                     name={selectedOrg?.name ?? ''}
