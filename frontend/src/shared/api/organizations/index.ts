@@ -14,4 +14,5 @@ export {
     useCreateInviteMutation,
     useJoinOrganizationMutation,
     useSearchOrgPagesQuery,
+    useAskOrganizationAiMutation,
 } from './organizationsApi';

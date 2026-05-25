@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { AiChatModule } from './ai-chat/ai-chat.module';
 import { AuthModule } from './auth/auth.module';
 import { HttpLoggerMiddleware } from './logger/http-logger.middleware';
 import { LoggerModule } from './logger/logger.module';
@@ -16,6 +17,7 @@ import { UserSettingsModule } from './user-settings/user-settings.module';
         LoggerModule,
         PrismaModule,
         AuthModule,
+        AiChatModule,
         SpacesModule,
         PagesModule,
         OrganizationsModule,

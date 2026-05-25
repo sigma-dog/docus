@@ -49,3 +49,17 @@ export type Organization = {
     };
     members?: OrgMember[];
 };
+
+export type AiChatSource = {
+    pageId: string;
+    title: string;
+    spaceKey: string;
+    chunkText: string;
+    score?: number | null;
+};
+
+export type AiChatResponse = {
+    answer: string;
+    sources: AiChatSource[];
+    usedChunksCount: number;
+};

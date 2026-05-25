@@ -7,6 +7,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 
+import { AiChatService } from '../ai-chat/ai-chat.service';
 import type { UploadedImageFile } from '../S3/types/uploaded-image-file.type';
 import { MAX_PAGE_IMAGE_SIZE_BYTES } from '../common/constants/files.constants';
 import { PrismaService } from '../prisma/prisma.service';
@@ -23,7 +24,8 @@ export class PagesService {
         private prisma: PrismaService,
         private spacesService: SpacesService,
         private pageHistoryService: PageHistoryService,
-        private readonly s3Service: S3Service
+        private readonly s3Service: S3Service,
+        private readonly aiChatService: AiChatService
     ) {}
 
     async create(
@@ -42,7 +44,7 @@ export class PagesService {
             await this.getPageOrThrow(dto.parentId, space.id);
         }
 
-        return this.prisma.page.create({
+        const page = await this.prisma.page.create({
             data: {
                 title: dto.title,
                 icon: dto.icon,
@@ -60,6 +62,8 @@ export class PagesService {
                 _count: { select: { children: true } },
             },
         });
+        this.indexPage(space, page, orgSlug);
+        return page;
     }
 
     async findTree(spaceKey: string, userId: string, orgSlug?: string) {
@@ -131,7 +135,7 @@ export class PagesService {
             );
         }
 
-        return this.prisma.page.update({
+        const page = await this.prisma.page.update({
             where: { id: pageId },
             data: dto,
             include: {
@@ -140,6 +144,8 @@ export class PagesService {
                 },
             },
         });
+        this.indexPage(space, page, orgSlug);
+        return page;
     }
 
     async uploadImage(
@@ -227,7 +233,7 @@ export class PagesService {
             );
         }
 
-        return this.prisma.page.update({
+        const restoredPage = await this.prisma.page.update({
             where: { id: page.id },
             data: {
                 title: historyEntry.title,
@@ -239,6 +245,8 @@ export class PagesService {
                 },
             },
         });
+        this.indexPage(space, restoredPage, orgSlug);
+        return restoredPage;
     }
 
     async remove(
@@ -255,6 +263,10 @@ export class PagesService {
 
         await this.getPageOrThrow(pageId, space.id);
         await this.prisma.page.delete({ where: { id: pageId } });
+        this.aiChatService.deletePageBestEffort({
+            organizationId: space.organizationId,
+            pageId,
+        });
     }
 
     async move(
@@ -302,6 +314,32 @@ export class PagesService {
         });
         if (!page) throw new NotFoundException(`Page "${pageId}" not found`);
         return page;
+    }
+
+    private indexPage(
+        space: { id: string; key: string; organizationId: string },
+        page: {
+            id: string;
+            title: string;
+            content: string | null;
+            isFolder: boolean;
+            updatedAt: Date;
+        },
+        orgSlug?: string
+    ) {
+        if (!orgSlug) return;
+
+        this.aiChatService.indexPageBestEffort({
+            organizationId: space.organizationId,
+            organizationSlug: orgSlug,
+            spaceId: space.id,
+            spaceKey: space.key,
+            pageId: page.id,
+            title: page.title,
+            content: page.content,
+            isFolder: page.isFolder,
+            updatedAt: page.updatedAt,
+        });
     }
 
     private assertViewer(

@@ -1,4 +1,5 @@
 import type {
+    AiChatResponse,
     Organization,
     OrganizationInvite,
     OrgMember,
@@ -28,6 +29,11 @@ type AddOrgMemberBody = {
 
 type UpdateOrgMemberRoleBody = {
     role: Exclude<OrgRole, 'OWNER'>;
+};
+
+type AskOrganizationAiBody = {
+    question: string;
+    topK?: number;
 };
 
 const getUrl = () => 'organizations';
@@ -206,6 +212,17 @@ export const organizationsApi = api.injectEndpoints({
             query: ({ slug, q }) =>
                 `${getUrl()}/${slug}/pages/search?q=${encodeURIComponent(q)}`,
         }),
+
+        askOrganizationAi: build.mutation<
+            AiChatResponse,
+            { slug: string; body: AskOrganizationAiBody }
+        >({
+            query: ({ slug, body }) => ({
+                url: `${getUrl()}/${slug}/ai/chat`,
+                method: apiMethods.post,
+                body,
+            }),
+        }),
     }),
     overrideExisting: false,
 });
@@ -225,4 +242,5 @@ export const {
     useCreateInviteMutation,
     useJoinOrganizationMutation,
     useSearchOrgPagesQuery,
+    useAskOrganizationAiMutation,
 } = organizationsApi;

@@ -139,6 +139,24 @@ model PageHistory {
   @@index([pageId, createdAt(sort: Desc)])
 }
 
+model PageChunk {
+  id             String                  @id @default(uuid())
+  organizationId String
+  spaceId        String
+  spaceKey       String
+  pageId         String
+  pageTitle      String
+  chunkIndex     Int
+  content        String
+  embedding      Unsupported("vector(768)")
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@unique([pageId, chunkIndex])
+  @@index([organizationId])
+  @@index([pageId])
+}
+
 enum Role {
   ADMIN
   EDITOR

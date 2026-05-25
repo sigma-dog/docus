@@ -4,6 +4,7 @@ import { Avatar, HStack, Icon, IconButton, Tabs } from '@chakra-ui/react';
 
 import { useGetCurrentUserQuery } from 'shared/api';
 import { getUserInfo } from 'shared/lib';
+import { OrganizationAiChat } from 'widgets/organizationAiChat';
 import { UserProfileDialog } from 'widgets/userProfileDialog';
 import { UserSettingsMenu } from 'widgets/userSettingsMenu';
 
@@ -66,6 +67,7 @@ export const Header = () => {
 
             <HStack gap={2} flexShrink={0}>
                 <SearchBox />
+                <OrganizationAiChat />
                 <Icon color="fg.muted" cursor="pointer" boxSize={5}>
                     <LuBell />
                 </Icon>
