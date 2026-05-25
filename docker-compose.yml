@@ -7,10 +7,50 @@ services:
             POSTGRES_USER: docus
             POSTGRES_PASSWORD: docus_secret
             POSTGRES_DB: docus
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U docus -d docus']
+            interval: 5s
+            timeout: 5s
+            retries: 10
         ports:
             - '5432:5432'
         volumes:
             - postgres_data:/var/lib/postgresql/data
+
+    backend:
+        build:
+            context: ./backend
+        container_name: docus_backend
+        restart: unless-stopped
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            DATABASE_URL: postgresql://docus:docus_secret@postgres:5432/docus
+            JWT_ACCESS_SECRET: change_me_access_secret
+            JWT_REFRESH_SECRET: change_me_refresh_secret
+            JWT_ACCESS_EXPIRES_IN: 15m
+            JWT_REFRESH_EXPIRES_IN: 7d
+            S3_ACCESS_KEY: ''
+            S3_SECRET_KEY: ''
+            S3_BUCKET_NAME: ''
+            S3_REGION: ru-1
+            S3_ENDPOINT: https://s3.timeweb.com
+            PORT: 3000
+        ports:
+            - '3000:3000'
+
+    frontend:
+        build:
+            context: ./frontend
+            args:
+                VITE_API_URL: http://localhost:3000
+        container_name: docus_frontend
+        restart: unless-stopped
+        depends_on:
+            - backend
+        ports:
+            - '5173:4173'
 
 volumes:
     postgres_data:
